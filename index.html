@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Kas & Iuran Warga RT</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- SheetJS for Excel Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <div class="flex-1 flex overflow-hidden min-h-screen">
+    
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-auto">
+      <!-- Logo RT -->
+      <div class="h-20 flex items-center gap-3 px-6 border-b border-slate-100 bg-slate-50/50">
+        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+          <i data-lucide="wallet" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-slate-800 text-base leading-tight label-rt-name">RT 05 / RW 08</h1>
+          <p class="text-xs text-slate-500 label-rt-sub">Kelurahan Sukamaju</p>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+        <button data-tab-target="dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition text-left">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Dashboard Kas</span>
+        </button>
+
+        <button data-tab-target="iuran" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition text-left">
+          <i data-lucide="calendar-check" class="w-4 h-4"></i>
+          <span>Matriks Iuran Warga</span>
+        </button>
+
+        <button data-tab-target="transaksi" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition text-left">
+          <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+          <span>Pengeluaran & Pemasukan</span>
+        </button>
+
+        <button data-tab-target="warga" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition text-left">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Data Warga / KK</span>
+        </button>
+
+        <button data-tab-target="laporan" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition text-left">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+          <span>Laporan & Buku Kas</span>
+        </button>
+
+        <button data-tab-target="settings" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition text-left">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          <span>Pengaturan & Cadangan</span>
+        </button>
+      </nav>
+
+      <!-- User/Bendahara Badge -->
+      <div class="p-4 border-t border-slate-100">
+        <div class="p-3 bg-slate-50 rounded-xl flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+            B
+          </div>
+          <div class="overflow-hidden">
+            <p class="text-xs font-bold text-slate-800 truncate">Sistem Kas RT</p>
+            <p class="text-[11px] text-slate-500">Pencatatan Rapi & Siap Cetak</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col overflow-y-auto bg-slate-50/70 min-w-0">
+      
+      <!-- Top Header -->
+      <header class="h-20 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-20">
+        <div class="flex items-center gap-3">
+          <button id="btn-toggle-sidebar" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg lg:hidden">
+            <i data-lucide="menu" class="w-6 h-6"></i>
+          </button>
+          <div>
+            <h2 class="font-bold text-lg text-slate-800 label-rt-name">Catatan Uang Kas RT</h2>
+            <p class="text-xs text-slate-500">Iuran Bulanan Warga & Pengeluaran Kas RT</p>
+          </div>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="flex items-center gap-2">
+          <button onclick="PengeluaranManager.openAddExpenseModal()" class="px-3.5 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold text-xs rounded-xl flex items-center gap-1.5 transition">
+            <i data-lucide="minus-circle" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Catat Pengeluaran</span>
+          </button>
+
+          <button onclick="PengeluaranManager.openAddIncomeModal()" class="px-3.5 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold text-xs rounded-xl flex items-center gap-1.5 transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Pemasukan Lain</span>
+          </button>
+
+          <button onclick="App.switchTab('iuran')" class="px-4 py-2 bg-emerald-600 text-white hover:bg-emerald-700 font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            <span>Bayar Iuran</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- SECTIONS CONTAINER -->
+      <div class="p-6 max-w-7xl w-full mx-auto space-y-6">
+
+        <!-- ================= TAB 1: DASHBOARD ================= -->
+        <section id="section-dashboard" class="tab-section space-y-6">
+          
+          <!-- Ringkasan Kartu / Key Metrics -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Saldo Kas -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 card-hover flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Saldo Kas RT</span>
+                <span class="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                  <i data-lucide="wallet" class="w-5 h-5"></i>
+                </span>
+              </div>
+              <div class="mt-4">
+                <h3 id="stat-saldo-kas" class="text-2xl font-extrabold text-slate-800">Rp 0</h3>
+                <p class="text-xs text-slate-400 mt-1">Total akumulasi dana kas saat ini</p>
+              </div>
+            </div>
+
+            <!-- Pemasukan Bulan Ini -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 card-hover flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pemasukan (<span class="label-current-month">-</span>)</span>
+                <span class="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                  <i data-lucide="trending-up" class="w-5 h-5"></i>
+                </span>
+              </div>
+              <div class="mt-4">
+                <h3 id="stat-pemasukan-bulan" class="text-2xl font-extrabold text-emerald-600">Rp 0</h3>
+                <p class="text-xs text-slate-400 mt-1">Total iuran & penerimaan masuk</p>
+              </div>
+            </div>
+
+            <!-- Pengeluaran Bulan Ini -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 card-hover flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pengeluaran (<span class="label-current-month">-</span>)</span>
+                <span class="p-2 bg-rose-50 text-rose-600 rounded-xl">
+                  <i data-lucide="trending-down" class="w-5 h-5"></i>
+                </span>
+              </div>
+              <div class="mt-4">
+                <h3 id="stat-pengeluaran-bulan" class="text-2xl font-extrabold text-rose-600">Rp 0</h3>
+                <p class="text-xs text-slate-400 mt-1">Biaya sampah, satpam, perbaikan, dll.</p>
+              </div>
+            </div>
+
+            <!-- Status Iuran Bulan Ini -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 card-hover flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Iuran (<span class="label-current-month">-</span>)</span>
+                <span class="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                  <i data-lucide="user-check" class="w-5 h-5"></i>
+                </span>
+              </div>
+              <div class="mt-4">
+                <h3 id="stat-iuran-status" class="text-xl font-extrabold text-slate-800">0 / 0 KK</h3>
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden">
+                  <div id="stat-iuran-progress" class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts & Recent Transactions Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Cash Flow Chart (2 cols) -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-bold text-slate-800 text-base">Arus Kas Bulanan</h3>
+                  <p class="text-xs text-slate-400">Grafik perbandingan Pemasukan vs Pengeluaran tahun berjalan</p>
+                </div>
+              </div>
+              <div class="h-64 sm:h-80">
+                <canvas id="cashflowChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Quick Summary Panel (1 col) -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+              <h3 class="font-bold text-slate-800 text-base mb-2">Aksi & Shortcut</h3>
+              <p class="text-xs text-slate-400 mb-5">Operasional rutin bendahara RT</p>
+
+              <div class="space-y-3 flex-1 flex flex-col justify-center">
+                <button onclick="App.switchTab('iuran')" class="w-full p-3.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-left flex items-center gap-3.5 transition group">
+                  <div class="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center group-hover:scale-105 transition">
+                    <i data-lucide="table" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-xs text-emerald-950">Matriks Iuran 12 Bulan</h4>
+                    <p class="text-[11px] text-emerald-700">Cek status lunas semua warga</p>
+                  </div>
+                </button>
+
+                <button onclick="PengeluaranManager.openAddExpenseModal()" class="w-full p-3.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl text-left flex items-center gap-3.5 transition group">
+                  <div class="w-10 h-10 rounded-lg bg-rose-600 text-white flex items-center justify-center group-hover:scale-105 transition">
+                    <i data-lucide="receipt" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-xs text-rose-950">Input Pengeluaran RT</h4>
+                    <p class="text-[11px] text-rose-700">Sampah, pos satpam, sosial dll.</p>
+                  </div>
+                </button>
+
+                <button onclick="App.switchTab('laporan'); LaporanManager.openPrintModal();" class="w-full p-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-left flex items-center gap-3.5 transition group">
+                  <div class="w-10 h-10 rounded-lg bg-slate-700 text-white flex items-center justify-center group-hover:scale-105 transition">
+                    <i data-lucide="printer" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-xs text-slate-800">Cetak Laporan Kas</h4>
+                    <p class="text-[11px] text-slate-500">Format resmi bertanda tangan</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Recent Transactions Table -->
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h3 class="font-bold text-slate-800 text-base">Aktivitas Transaksi Terakhir</h3>
+                <p class="text-xs text-slate-400">Mutasi kas RT terbaru yang telah tercatat</p>
+              </div>
+              <button onclick="App.switchTab('transaksi')" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+                <span>Lihat Semua</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                  <tr>
+                    <th class="py-3 px-4">Tanggal</th>
+                    <th class="py-3 px-4">Jenis</th>
+                    <th class="py-3 px-4">Uraian Transaksi</th>
+                    <th class="py-3 px-4">Kategori</th>
+                    <th class="py-3 px-4 text-right">Nominal</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-recent-transactions" class="divide-y divide-slate-100">
+                  <!-- Generated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ================= TAB 2: MATRIKS IURAN WARGA ================= -->
+        <section id="section-iuran" class="tab-section hidden space-y-5">
+          
+          <!-- Controls Header -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+            <div>
+              <h3 class="font-bold text-slate-800 text-lg">Matriks Iuran Bulanan Warga</h3>
+              <p class="text-xs text-slate-500">Tabel monitoring status pembayaran iuran warga per bulan (Januari - Desember)</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+              <!-- Search Warga -->
+              <div class="relative min-w-[200px]">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input 
+                  type="text" 
+                  id="iuran-search-warga" 
+                  placeholder="Cari Blok / Nama warga..." 
+                  class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+              </div>
+
+              <!-- Year Selector -->
+              <select id="iuran-matrix-year" class="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="2025">Tahun 2025</option>
+                <option value="2026" selected>Tahun 2026</option>
+                <option value="2027">Tahun 2027</option>
+              </select>
+
+              <!-- Add Warga Button Shortcut -->
+              <button onclick="WargaManager.openAddModal()" class="px-3 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center gap-1">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                <span>Tambah Warga</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Petunjuk Singkat -->
+          <div class="flex flex-wrap items-center gap-4 text-xs bg-slate-100/70 p-3 rounded-xl border border-slate-200 text-slate-600">
+            <span class="font-bold text-slate-700">Keterangan:</span>
+            <div class="flex items-center gap-1.5">
+              <span class="w-3.5 h-3.5 rounded bg-emerald-100 border border-emerald-300"></span>
+              <span><strong>Lunas</strong> (Klik untuk lihat & salin struk WA)</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-3.5 h-3.5 rounded bg-rose-100 border border-rose-300"></span>
+              <span><strong>Belum</strong> (Klik untuk catat bayar)</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded font-semibold text-[10px]">Bayar</span>
+              <span>Bayar multi-bulan sekaligus</span>
+            </div>
+          </div>
+
+          <!-- Matrix Table -->
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-100 sticky top-0 z-10 text-[11px] font-bold text-slate-700 uppercase tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th class="py-3 px-3 text-center w-10">No</th>
+                    <th class="py-3 px-3 w-20">Blok</th>
+                    <th class="py-3 px-3 min-w-[150px]">Nama Warga</th>
+                    <th class="py-3 px-1.5 text-center w-14">Jan</th>
+                    <th class="py-3 px-1.5 text-center w-14">Feb</th>
+                    <th class="py-3 px-1.5 text-center w-14">Mar</th>
+                    <th class="py-3 px-1.5 text-center w-14">Apr</th>
+                    <th class="py-3 px-1.5 text-center w-14">Mei</th>
+                    <th class="py-3 px-1.5 text-center w-14">Jun</th>
+                    <th class="py-3 px-1.5 text-center w-14">Jul</th>
+                    <th class="py-3 px-1.5 text-center w-14">Agu</th>
+                    <th class="py-3 px-1.5 text-center w-14">Sep</th>
+                    <th class="py-3 px-1.5 text-center w-14">Okt</th>
+                    <th class="py-3 px-1.5 text-center w-14">Nov</th>
+                    <th class="py-3 px-1.5 text-center w-14">Des</th>
+                    <th class="py-3 px-3 text-right w-28">Total Bayar</th>
+                    <th class="py-3 px-3 text-center w-20">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="iuran-matrix-body" class="divide-y divide-slate-100">
+                  <!-- Generated dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Footer Stats -->
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-600 gap-2">
+              <div>
+                Total Iuran Terkumpul: <strong id="iuran-matrix-summary-total" class="text-emerald-700 text-sm font-bold">Rp 0</strong>
+              </div>
+              <div class="text-[11px] text-slate-400">
+                Pencatatan tersimpan otomatis di browser
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ================= TAB 3: TRANSAKSI (PENGELUARAN & PEMASUKAN LAIN) ================= -->
+        <section id="section-transaksi" class="tab-section hidden space-y-5">
+          
+          <!-- Tab Buttons & Filters -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+            <!-- Sub-tab switchers -->
+            <div class="inline-flex p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+              <button 
+                id="tab-btn-pengeluaran" 
+                onclick="PengeluaranManager.switchTab('pengeluaran')" 
+                class="px-4 py-2 rounded-lg bg-white text-slate-800 shadow-sm transition">
+                Pengeluaran Kas RT
+              </button>
+              <button 
+                id="tab-btn-pemasukan-lain" 
+                onclick="PengeluaranManager.switchTab('pemasukan')" 
+                class="px-4 py-2 rounded-lg text-slate-500 hover:text-slate-800 transition">
+                Pemasukan Non-Iuran
+              </button>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex flex-wrap items-center gap-3">
+              <!-- Filter Category -->
+              <select id="filter-category-pengeluaran" class="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="all">Semua Kategori</option>
+              </select>
+
+              <!-- Search -->
+              <div class="relative min-w-[180px]">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input 
+                  type="text" 
+                  id="search-transaksi" 
+                  placeholder="Cari transaksi..." 
+                  class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+              </div>
+
+              <!-- Button Add Expense / Income -->
+              <button onclick="PengeluaranManager.activeTab === 'pengeluaran' ? PengeluaranManager.openAddExpenseModal() : PengeluaranManager.openAddIncomeModal()" class="px-4 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm transition flex items-center gap-1.5">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Tambah Transaksi</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Transaction List Table -->
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+              <h4 id="transaksi-tab-title" class="font-bold text-sm text-slate-800">Daftar Pengeluaran Kas RT</h4>
+              <span id="transaksi-total-footer" class="font-bold text-sm text-slate-800">Total: Rp 0</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                  <tr>
+                    <th class="py-3 px-4 text-center w-12">No</th>
+                    <th class="py-3 px-4 w-32">Tanggal</th>
+                    <th class="py-3 px-4 w-48">Kategori</th>
+                    <th class="py-3 px-4">Uraian & Keterangan</th>
+                    <th class="py-3 px-4 text-right w-36">Nominal</th>
+                    <th class="py-3 px-4 text-center w-24">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="transaksi-table-body" class="divide-y divide-slate-100">
+                  <!-- Generated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ================= TAB 4: DATA WARGA ================= -->
+        <section id="section-warga" class="tab-section hidden space-y-5">
+          
+          <!-- Stats & Top Controls -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                <i data-lucide="users" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Total Kepala Keluarga</p>
+                <h4 id="warga-total-count" class="text-lg font-extrabold text-slate-800">0 KK</h4>
+              </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                <i data-lucide="home" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Warga Tetap</p>
+                <h4 id="warga-tetap-count" class="text-lg font-extrabold text-emerald-600">0 KK</h4>
+              </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                <i data-lucide="key" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Warga Kontrak / Sewa</p>
+                <h4 id="warga-kontrak-count" class="text-lg font-extrabold text-amber-600">0 KK</h4>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 class="font-bold text-slate-800 text-base">Daftar Warga & Kepala Keluarga</h3>
+                <p class="text-xs text-slate-400">Data warga pembayar iuran lingkungan RT</p>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div class="relative min-w-[200px]">
+                  <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                  <input 
+                    type="text" 
+                    id="search-warga-list" 
+                    placeholder="Cari blok/nama/wa..." 
+                    class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                </div>
+                <button onclick="WargaManager.openAddModal()" class="px-4 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm transition flex items-center gap-1.5">
+                  <i data-lucide="user-plus" class="w-4 h-4"></i>
+                  <span>Tambah Warga</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                  <tr>
+                    <th class="py-3 px-4 text-center w-12">No</th>
+                    <th class="py-3 px-4 w-28">No. Rumah / Blok</th>
+                    <th class="py-3 px-4">Nama Kepala Keluarga</th>
+                    <th class="py-3 px-4">No. WhatsApp</th>
+                    <th class="py-3 px-4 w-32">Status Rumah</th>
+                    <th class="py-3 px-4 text-right w-36">Iuran / Bulan</th>
+                    <th class="py-3 px-4 text-center w-24">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="warga-table-body" class="divide-y divide-slate-100">
+                  <!-- Generated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ================= TAB 5: LAPORAN & BUKU KAS ================= -->
+        <section id="section-laporan" class="tab-section hidden space-y-5">
+          
+          <!-- Filters & Action Bar -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+            <!-- Subtab switches -->
+            <div class="inline-flex p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+              <button 
+                id="subtab-btn-bukukas" 
+                onclick="LaporanManager.switchSubTab('bukukas')" 
+                class="px-4 py-2 rounded-lg bg-white text-slate-800 shadow-sm transition">
+                Buku Kas Umum (Saldo Berjalan)
+              </button>
+              <button 
+                id="subtab-btn-tunggakan" 
+                onclick="LaporanManager.switchSubTab('tunggakan')" 
+                class="px-4 py-2 rounded-lg text-slate-500 hover:text-slate-800 transition">
+                Rekap Tunggakan Warga
+              </button>
+            </div>
+
+            <!-- Filters & Export -->
+            <div class="flex flex-wrap items-center gap-3">
+              <!-- Filter Bulan -->
+              <select id="laporan-filter-month" class="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="all">Semua Bulan (Setahun)</option>
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+
+              <!-- Filter Tahun -->
+              <select id="laporan-filter-year" class="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+              </select>
+
+              <!-- Export Excel -->
+              <button onclick="LaporanManager.exportToExcel()" class="px-3.5 py-2 text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl transition flex items-center gap-1.5">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                <span>Export Excel</span>
+              </button>
+
+              <!-- Print Report -->
+              <button onclick="LaporanManager.openPrintModal()" class="px-3.5 py-2 text-xs font-bold bg-slate-800 text-white hover:bg-slate-900 rounded-xl shadow-sm transition flex items-center gap-1.5">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                <span>Cetak Laporan</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- VIEW 1: Buku Kas Umum -->
+          <div id="laporan-bukukas-view" class="space-y-4">
+            <!-- Summary Bar -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                <span class="text-xs text-emerald-800 font-semibold">Total Pemasukan Periode Ini</span>
+                <h4 id="bukukas-summary-masuk" class="text-xl font-extrabold text-emerald-700 mt-1">Rp 0</h4>
+              </div>
+              <div class="bg-rose-50 border border-rose-200 p-4 rounded-xl">
+                <span class="text-xs text-rose-800 font-semibold">Total Pengeluaran Periode Ini</span>
+                <h4 id="bukukas-summary-keluar" class="text-xl font-extrabold text-rose-700 mt-1">Rp 0</h4>
+              </div>
+              <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl">
+                <span class="text-xs text-blue-800 font-semibold">Saldo Kas Berjalan</span>
+                <h4 id="bukukas-summary-saldo" class="text-xl font-extrabold text-blue-700 mt-1">Rp 0</h4>
+              </div>
+            </div>
+
+            <!-- Ledger Table -->
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                  <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                    <tr>
+                      <th class="py-3 px-3 text-center w-12">No</th>
+                      <th class="py-3 px-3 w-28">Tanggal</th>
+                      <th class="py-3 px-3 w-36">Kategori</th>
+                      <th class="py-3 px-3">Uraian Transaksi</th>
+                      <th class="py-3 px-3 text-right w-32 text-emerald-700">Masuk (Rp)</th>
+                      <th class="py-3 px-3 text-right w-32 text-rose-700">Keluar (Rp)</th>
+                      <th class="py-3 px-3 text-right w-36 font-extrabold">Saldo Kas (Rp)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bukukas-table-body" class="divide-y divide-slate-100">
+                    <!-- Generated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW 2: Rekap Tunggakan Warga -->
+          <div id="laporan-tunggakan-view" class="hidden space-y-4">
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between">
+              <div>
+                <span class="text-xs text-amber-800 font-semibold">Total Estimasi Tunggakan Iuran</span>
+                <h4 id="tunggakan-grand-total" class="text-xl font-extrabold text-amber-700 mt-1">Rp 0</h4>
+              </div>
+              <p class="text-xs text-amber-800 max-w-sm">Daftar warga yang belum melunasi iuran sampai dengan bulan yang dipilih.</p>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                  <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                    <tr>
+                      <th class="py-3 px-4 text-center w-12">No</th>
+                      <th class="py-3 px-4 w-28">No. Rumah</th>
+                      <th class="py-3 px-4">Nama Warga / KK</th>
+                      <th class="py-3 px-4">Bulan Menunggak</th>
+                      <th class="py-3 px-4 text-right w-36">Total Tunggakan</th>
+                      <th class="py-3 px-4 text-center w-28">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tunggakan-table-body" class="divide-y divide-slate-100">
+                    <!-- Generated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ================= TAB 6: PENGATURAN & BACKUP ================= -->
+        <section id="section-settings" class="tab-section hidden space-y-6">
+          
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Form Pengaturan RT (2 cols) -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <h3 class="font-bold text-slate-800 text-lg mb-1">Identitas & Pengaturan RT</h3>
+              <p class="text-xs text-slate-400 mb-6">Data ini akan muncul di kop surat laporan dan kwitansi resmi iuran.</p>
+
+              <form id="form-settings" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Rukun Tetangga (RT/RW)</label>
+                    <input type="text" id="setting-nama-rt" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Kelurahan / Desa</label>
+                    <input type="text" id="setting-kelurahan" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Kecamatan</label>
+                    <input type="text" id="setting-kecamatan" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Kota / Kabupaten</label>
+                    <input type="text" id="setting-kota" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Ketua RT</label>
+                    <input type="text" id="setting-ketua-rt" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Bendahara RT</label>
+                    <input type="text" id="setting-bendahara" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Tarif Iuran Standar (Rp/Bulan)</label>
+                    <input type="number" id="setting-nominal-iuran" required min="0" step="1000" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Tahun Aktif Pembukuan</label>
+                    <input type="number" id="setting-tahun-aktif" required min="2020" max="2035" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Rincian Pos Iuran (Muncul di Struk/Kwitansi)</label>
+                  <input type="text" id="setting-rincian-iuran" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Kebersihan/Sampah, Keamanan, Kas RT">
+                </div>
+
+                <div class="pt-2">
+                  <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+                    Simpan Pengaturan
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Backup, Restore & Reset (1 col) -->
+            <div class="space-y-6">
+              <!-- Backup & Restore -->
+              <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 text-base mb-1">Cadangan & Pemulihan Data</h3>
+                <p class="text-xs text-slate-400 mb-4">Simpan berkas data kas RT agar aman atau dapat dipindah ke komputer lain.</p>
+
+                <div class="space-y-3">
+                  <button id="btn-download-backup" class="w-full p-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 flex items-center justify-center gap-2 transition">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Download Cadangan (JSON)</span>
+                  </button>
+
+                  <div class="pt-2 border-t border-slate-100">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Pulihkan Data dari Berkas JSON:</label>
+                    <input type="file" id="file-restore-backup" accept=".json" class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reset Data -->
+              <div class="bg-rose-50/50 p-6 rounded-2xl border border-rose-200">
+                <h3 class="font-bold text-rose-800 text-base mb-1">Reset ke Data Awal</h3>
+                <p class="text-xs text-rose-600 mb-4">Menghapus data saat ini dan mengembalikannya ke contoh data default.</p>
+                
+                <button id="btn-reset-sample-data" class="w-full p-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl transition shadow-sm">
+                  Reset Data Kas RT
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. Modal Quick Pay Single Month -->
+  <div id="modal-quick-pay" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="font-bold text-base text-slate-800">Catat Pembayaran Iuran</h3>
+        <button onclick="IuranManager.closeModal('modal-quick-pay')" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="IuranManager.submitQuickPay(event)" class="p-5 space-y-4">
+        <input type="hidden" id="quick-pay-warga-id">
+        <input type="hidden" id="quick-pay-month">
+        <input type="hidden" id="quick-pay-year">
+
+        <div id="quick-pay-warga-info"></div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Pembayaran</label>
+          <input type="date" id="quick-pay-tanggal" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nominal Iuran (Rp)</label>
+          <input type="number" id="quick-pay-nominal" required min="0" step="1000" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold text-slate-800">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Metode Pembayaran</label>
+          <select id="quick-pay-metode" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <option value="Transfer / QRIS">Transfer Bank / QRIS</option>
+            <option value="Tunai / Cash">Tunai / Cash</option>
+            <option value="Titip Petugas">Titip Petugas Lingkungan</option>
+          </select>
+        </div>
+
+        <div class="pt-3 flex gap-2">
+          <button type="button" onclick="IuranManager.closeModal('modal-quick-pay')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+            Simpan Pembayaran
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Modal Batch Pay Multiple Months -->
+  <div id="modal-batch-pay" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="font-bold text-base text-slate-800">Pembayaran Iuran Sekaligus (Multi-Bulan)</h3>
+        <button onclick="IuranManager.closeModal('modal-batch-pay')" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="IuranManager.submitBatchPay(event)" class="p-5 space-y-4 overflow-y-auto flex-1">
+        <input type="hidden" id="batch-pay-warga-id">
+        <input type="hidden" id="batch-pay-year">
+
+        <div id="batch-pay-warga-info"></div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-2">Pilih Bulan yang Ingin Dibayar:</label>
+          <div id="batch-pay-months-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Bayar</label>
+            <input type="date" id="batch-pay-tanggal" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Metode</label>
+            <select id="batch-pay-metode" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="Transfer / QRIS">Transfer Bank / QRIS</option>
+              <option value="Tunai / Cash">Tunai / Cash</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Total Calculation Card -->
+        <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center justify-between">
+          <div>
+            <span class="text-xs text-emerald-800">Total Periode Dipilih:</span>
+            <h5 id="batch-pay-selected-count" class="font-bold text-emerald-900 text-sm">0 Bulan</h5>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-emerald-800">Total Nominal:</span>
+            <h4 id="batch-pay-total-amount" class="text-lg font-extrabold text-emerald-700">Rp 0</h4>
+          </div>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="IuranManager.closeModal('modal-batch-pay')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+            Konfirmasi Pelunasan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Modal Receipt & WhatsApp Slip Preview -->
+  <div id="modal-receipt" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200 max-h-[95vh] flex flex-col">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+          <i data-lucide="receipt" class="w-4 h-4 text-emerald-600"></i>
+          <span>Kwitansi / Bukti Pembayaran Iuran</span>
+        </h3>
+        <button onclick="IuranManager.closeModal('modal-receipt')" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto flex-1 bg-slate-100/60">
+        <div id="receipt-preview-content"></div>
+      </div>
+
+      <div class="p-4 border-t border-slate-200 bg-white flex flex-wrap items-center justify-between gap-2">
+        <button id="btn-delete-receipt-payment" class="px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition">
+          Batalkan Transaksi
+        </button>
+
+        <div class="flex items-center gap-2 ml-auto">
+          <button id="btn-copy-wa-receipt" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center gap-1.5">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>Salin Teks WA</span>
+          </button>
+          
+          <button id="btn-send-wa-receipt" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span>Kirim WhatsApp</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Modal Add Expense -->
+  <div id="modal-add-expense" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+          <span class="p-1.5 bg-rose-50 text-rose-600 rounded-lg"><i data-lucide="minus-circle" class="w-4 h-4"></i></span>
+          <span>Catat Pengeluaran RT</span>
+        </h3>
+        <button onclick="PengeluaranManager.closeModal('modal-add-expense')" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="form-add-expense" onsubmit="PengeluaranManager.submitAddExpense(event)" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Pengeluaran</label>
+          <input type="date" id="add-expense-tanggal" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Kategori Pengeluaran</label>
+          <select id="add-expense-category" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500 focus:outline-none"></select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Uraian / Keterangan Pembelian / Biaya</label>
+          <input type="text" id="add-expense-uraian" required placeholder="Contoh: Honor Petugas Sampah, Beli 3 Lampu PJU, dll." class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nominal (Rp)</label>
+          <input type="number" id="add-expense-nominal" required min="1000" step="1000" placeholder="0" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500 focus:outline-none font-bold text-rose-700">
+        </div>
+
+        <div class="pt-3 flex gap-2">
+          <button type="button" onclick="PengeluaranManager.closeModal('modal-add-expense')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+            Simpan Pengeluaran
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Modal Add Other Income -->
+  <div id="modal-add-income" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+          <span class="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="plus-circle" class="w-4 h-4"></i></span>
+          <span>Catat Pemasukan Non-Iuran</span>
+        </h3>
+        <button onclick="PengeluaranManager.closeModal('modal-add-income')" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="form-add-income" onsubmit="PengeluaranManager.submitAddIncome(event)" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Penerimaan</label>
+          <input type="date" id="add-income-tanggal" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Kategori Pemasukan</label>
+          <select id="add-income-category" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Uraian / Sumber Dana</label>
+          <input type="text" id="add-income-uraian" required placeholder="Contoh: Donasi Bpk. X untuk Pos Kamling, Kas Sisa Tahun Lalu" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nominal (Rp)</label>
+          <input type="number" id="add-income-nominal" required min="1000" step="1000" placeholder="0" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none font-bold text-emerald-700">
+        </div>
+
+        <div class="pt-3 flex gap-2">
+          <button type="button" onclick="PengeluaranManager.closeModal('modal-add-income')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+            Simpan Pemasukan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Modal Edit Transaction -->
+  <div id="modal-edit-transaksi" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="font-bold text-base text-slate-800">Edit Transaksi</h3>
+        <button onclick="PengeluaranManager.closeModal('modal-edit-transaksi')" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="PengeluaranManager.submitEdit(event)" class="p-5 space-y-4">
+        <input type="hidden" id="edit-tx-id">
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal</label>
+          <input type="date" id="edit-tx-tanggal" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Kategori</label>
+          <select id="edit-tx-kategori" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none"></select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Uraian Transaksi</label>
+          <input type="text" id="edit-tx-uraian" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nominal (Rp)</label>
+          <input type="number" id="edit-tx-nominal" required min="1" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none font-bold">
+        </div>
+
+        <div class="pt-3 flex gap-2">
+          <button type="button" onclick="PengeluaranManager.closeModal('modal-edit-transaksi')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+            Perbarui
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. Modal Add/Edit Warga -->
+  <div id="modal-warga" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <h3 id="modal-warga-title" class="font-bold text-base text-slate-800">Tambah Data Warga</h3>
+        <button onclick="WargaManager.closeModal()" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="form-warga" onsubmit="WargaManager.submitForm(event)" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">No. Rumah / Blok</label>
+          <input type="text" id="warga-blok" required placeholder="Contoh: A-01, Blok B No. 12" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nama Kepala Keluarga (KK)</label>
+          <input type="text" id="warga-nama" required placeholder="Nama Lengkap" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">No. WhatsApp / HP</label>
+          <input type="text" id="warga-telp" placeholder="08xxxxxxxxxx" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Status Rumah</label>
+            <select id="warga-status" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="Tetap">Tetap (Pemilik)</option>
+              <option value="Kontrak">Kontrak / Sewa</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Iuran / Bulan (Rp)</label>
+            <input type="number" id="warga-nominal" required min="0" step="1000" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold">
+          </div>
+        </div>
+
+        <div class="pt-3 flex gap-2">
+          <button type="button" onclick="WargaManager.closeModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+            Simpan Warga
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. Modal Print Report Preview -->
+  <div id="modal-print-report" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 max-h-[95vh] flex flex-col">
+      <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 no-print">
+        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+          <i data-lucide="printer" class="w-4 h-4 text-emerald-600"></i>
+          <span>Pratinjau Laporan Cetak (Print View)</span>
+        </h3>
+        <button onclick="LaporanManager.closeModal('modal-print-report')" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto flex-1 bg-slate-100">
+        <div id="print-report-content" class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 max-w-3xl mx-auto"></div>
+      </div>
+
+      <div class="p-4 border-t border-slate-200 bg-white flex items-center justify-between no-print">
+        <button onclick="LaporanManager.closeModal('modal-print-report')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">
+          Tutup
+        </button>
+
+        <button onclick="LaporanManager.triggerPrint()" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Cetak Sekarang (Print / PDF)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Scripts -->
+  <script src="js/dummyData.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/iuran.js"></script>
+  <script src="js/pengeluaran.js"></script>
+  <script src="js/warga.js"></script>
+  <script src="js/laporan.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
