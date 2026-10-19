@@ -1,10 +1,7 @@
-# Dependencies
+# Dependency & OS files
 node_modules/
-
-# Scratch & test scripts
-scratch/
-
-# OS metadata
 .DS_Store
 Thumbs.db
-*.log
+
+# Scratch and test files
+scratch/

@@ -1626,18 +1626,6 @@
       "metode": "Tunai"
     },
     {
-      "id": "tx-2",
-      "tanggal": "2026-01-04",
-      "jenis": "iuran",
-      "kategori": "Iuran Warga",
-      "uraian": "Iuran Bulan 1/2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT))",
-      "nominal": 150000,
-      "wargaId": "w-1",
-      "bulanIuran": 1,
-      "tahunIuran": 2026,
-      "metode": "Transfer Bank"
-    },
-    {
       "id": "tx-7",
       "tanggal": "2026-01-04",
       "jenis": "iuran",
@@ -24736,6 +24724,18 @@
       "bulanIuran": null,
       "tahunIuran": null,
       "metode": "Tunai"
+    },
+    {
+      "id": "tx-1792373470225-737",
+      "tanggal": "2026-10-19",
+      "jenis": "iuran",
+      "kategori": "Iuran Warga",
+      "uraian": "Iuran Bulan Januari 2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT))",
+      "nominal": 150000,
+      "wargaId": "w-1",
+      "bulanIuran": 1,
+      "tahunIuran": 2026,
+      "metode": "Tunai / Cash"
     }
   ],
   "pengurus": [

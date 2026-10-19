@@ -39,3 +39,11 @@ INSERT INTO log_perubahan (waktu, aksi, keterangan) VALUES ('2026-10-19T00:40:32
 Full data restoration
 INSERT INTO log_perubahan (waktu, aksi, keterangan) VALUES ('2026-10-19T00:41:15.650Z', 'INIT_FULL_DATA', 'Sinkronisasi data ke kas_rt.sql');
 
+-- [2026-10-19T01:30:59.295Z] AKSI: HAPUS_TRANSAKSI (Iuran Warga (Iuran Bulan 1/2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT))))
+DELETE FROM transaksi WHERE id = 'tx-2';
+INSERT INTO log_perubahan (waktu, aksi, keterangan) VALUES ('2026-10-19T01:30:59.295Z', 'HAPUS_TRANSAKSI (Iuran Warga (Iuran Bulan 1/2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT))))', 'Sinkronisasi data ke kas_rt.sql');
+
+-- [2026-10-19T01:31:10.735Z] AKSI: BAYAR_IURAN (Iuran Bulan Januari 2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT)))
+INSERT INTO transaksi (id, tanggal, jenis, kategori, uraian, nominal, warga_id, bulan_iuran, tahun_iuran, metode) VALUES ('tx-1792373470225-737', '2026-10-19', 'iuran', 'Iuran Warga', 'Iuran Bulan Januari 2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT))', 150000, 'w-1', 1, 2026, 'Tunai / Cash');
+INSERT INTO log_perubahan (waktu, aksi, keterangan) VALUES ('2026-10-19T01:31:10.735Z', 'BAYAR_IURAN (Iuran Bulan Januari 2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT)))', 'Sinkronisasi data ke kas_rt.sql');
+

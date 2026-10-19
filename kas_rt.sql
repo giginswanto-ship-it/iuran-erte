@@ -1,7 +1,7 @@
 -- ========================================================
 -- SISTEM KAS & IURAN WARGA RT
 -- Berkas Database SQL: kas_rt.sql
--- Terakhir Diperbarui: 2026-10-19 00:41:15
+-- Terakhir Diperbarui: 2026-10-19 01:31:10
 -- Kompatibel dengan: SQLite, MySQL, MariaDB, PostgreSQL
 -- ========================================================
 
@@ -100,7 +100,7 @@ INSERT INTO settings (id, nama_rt, kelurahan, kecamatan, kota, nama_ketua_rt, na
   150000,
   'Kebersihan & Sampah: Rp 75.000, Keamanan & Satpam: Rp 50.000, Kas RT: Rp 25.000',
   2026,
-  '2026-10-19 00:41:15'
+  '2026-10-19 01:31:10'
 );
 
 -- Data Warga (200 KK)
@@ -309,7 +309,6 @@ INSERT INTO warga (id, blok, nama, telp, status, nominal_iuran) VALUES
 -- Data Transaksi Kas & Iuran (1927 catatan)
 INSERT INTO transaksi (id, tanggal, jenis, kategori, uraian, nominal, warga_id, bulan_iuran, tahun_iuran, metode) VALUES
   ('tx-1', '2026-01-01', 'pemasukan', 'Saldo Awal Kas', 'Saldo kas sisa pembukuan tahun sebelumnya RT 10 / RW 10', 15000000, NULL, NULL, NULL, 'Tunai'),
-  ('tx-2', '2026-01-04', 'iuran', 'Iuran Warga', 'Iuran Bulan 1/2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT))', 150000, 'w-1', 1, 2026, 'Transfer Bank'),
   ('tx-7', '2026-01-04', 'iuran', 'Iuran Warga', 'Iuran Bulan 1/2026 - Blok J1 No. 06 (Bayu Kurniawan)', 150000, 'w-6', 1, 2026, 'Tunai'),
   ('tx-12', '2026-01-04', 'iuran', 'Iuran Warga', 'Iuran Bulan 1/2026 - Blok J1 No. 11 (Hadi Kurniawan)', 150000, 'w-11', 1, 2026, 'QRIS RT'),
   ('tx-17', '2026-01-04', 'iuran', 'Iuran Warga', 'Iuran Bulan 1/2026 - Blok J1 No. 16 (Purnomo Kurniawan)', 150000, 'w-16', 1, 2026, 'Transfer Bank'),
@@ -2234,7 +2233,8 @@ INSERT INTO transaksi (id, tanggal, jenis, kategori, uraian, nominal, warga_id, 
   ('tx-1902', '2026-10-16', 'iuran', 'Iuran Warga', 'Iuran Bulan 10/2026 - Blok J9 No. 17 (Rahmat Hamzah)', 150000, 'w-177', 10, 2026, 'Tunai'),
   ('tx-1906', '2026-10-16', 'iuran', 'Iuran Warga', 'Iuran Bulan 10/2026 - Blok J10 No. 02 (Eko Hidayat)', 150000, 'w-182', 10, 2026, 'QRIS RT'),
   ('tx-1917', '2026-10-16', 'iuran', 'Iuran Warga', 'Iuran Bulan 10/2026 - Blok J10 No. 17 (Joko Hidayat)', 150000, 'w-197', 10, 2026, 'QRIS RT'),
-  ('tx-1922', '2026-10-20', 'pengeluaran', 'Konsumsi Rapat / Kerja Bakti', 'Konsumsi Kerja Bakti Lingkungan & Rapat Koordinasi Blok J Bulan 10', 750000, NULL, NULL, NULL, 'Tunai');
+  ('tx-1922', '2026-10-20', 'pengeluaran', 'Konsumsi Rapat / Kerja Bakti', 'Konsumsi Kerja Bakti Lingkungan & Rapat Koordinasi Blok J Bulan 10', 750000, NULL, NULL, NULL, 'Tunai'),
+  ('tx-1792373470225-737', '2026-10-19', 'iuran', 'Iuran Warga', 'Iuran Bulan Januari 2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT))', 150000, 'w-1', 1, 2026, 'Tunai / Cash');
 
 -- Data Susunan Pengurus RT (15 personalia)
 INSERT INTO pengurus (id, jabatan, kategori, nama, blok, telp, badge, badge_color, avatar_bg, tugas) VALUES
