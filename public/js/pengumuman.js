@@ -423,22 +423,19 @@ const PengumumanManager = {
           <!-- Bottom Contact & Action Buttons (Edit, Hapus, WA) -->
           <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-1.5">
-              <a href="${waUrl}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center gap-1 border border-emerald-200 transition" title="Hubungi via WhatsApp">
-                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+              <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center gap-1.5 border border-emerald-200 transition" title="Hubungi WhatsApp ${p.nama}">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
                 <span>WA</span>
+                <span class="text-[11px] font-semibold text-emerald-800 border-l border-emerald-200 pl-1.5 truncate max-w-[110px]">${p.telp || '-'}</span>
               </a>
-              <div class="text-[11px] text-slate-500 font-medium flex items-center gap-1 truncate max-w-[100px] sm:max-w-[120px]" title="${p.telp}">
-                <i data-lucide="phone" class="w-3 h-3 text-slate-400 shrink-0"></i>
-                <span class="truncate">${p.telp || '-'}</span>
-              </div>
             </div>
 
             <div class="flex items-center gap-1.5">
-              <button onclick="PengumumanManager.openEditPengurusModal('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs flex items-center gap-1 border border-blue-200 transition" title="Edit Data Pengurus (PIN 1234)">
+              <button type="button" onclick="PengumumanManager.openEditPengurusModal('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs flex items-center gap-1 border border-blue-200 transition cursor-pointer" title="Edit Data Pengurus (PIN: 1234)">
                 <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                 <span>Edit</span>
               </button>
-              <button onclick="PengumumanManager.openDeletePengurusModal('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs flex items-center gap-1 border border-rose-200 transition" title="Hapus Data Pengurus (PIN 1234)">
+              <button type="button" onclick="PengumumanManager.openDeletePengurusModal('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs flex items-center gap-1 border border-rose-200 transition cursor-pointer" title="Hapus Data Pengurus (PIN: 1234)">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 <span>Hapus</span>
               </button>
@@ -488,7 +485,7 @@ const PengumumanManager = {
     document.getElementById('pengurus-id').value = '';
     document.getElementById('modal-pengurus-title').textContent = 'Tambah Personalia Pengurus RT';
     document.getElementById('btn-save-pengurus-text').textContent = 'Simpan Pengurus';
-    document.getElementById('pengurus-pin').value = '';
+    document.getElementById('pengurus-pin').value = '1234';
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -512,7 +509,7 @@ const PengumumanManager = {
     document.getElementById('pengurus-badge').value = item.badge || '';
     document.getElementById('pengurus-theme-color').value = item.badgeColor || 'blue';
     document.getElementById('pengurus-tugas').value = item.tugas || '';
-    document.getElementById('pengurus-pin').value = '';
+    document.getElementById('pengurus-pin').value = '1234';
 
     document.getElementById('modal-pengurus-title').textContent = 'Edit Personalia Pengurus RT';
     document.getElementById('btn-save-pengurus-text').textContent = 'Perbarui Pengurus';
@@ -591,7 +588,7 @@ const PengumumanManager = {
     document.getElementById('delete-pengurus-nama-label').textContent = item.nama;
     document.getElementById('delete-pengurus-jabatan-label').textContent = item.jabatan;
     document.getElementById('delete-pengurus-blok-label').textContent = `${item.blok} • ${item.telp}`;
-    document.getElementById('delete-pengurus-pin').value = '';
+    document.getElementById('delete-pengurus-pin').value = '1234';
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
