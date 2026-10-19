@@ -118,7 +118,7 @@ const WargaManager = {
     this.editingWargaId = null;
     document.getElementById('modal-warga-title').textContent = "Tambah Data Warga";
     document.getElementById('form-warga').reset();
-    document.getElementById('warga-nominal').value = Store.settings.nominalIuran || 50000;
+    document.getElementById('warga-nominal').value = Store.settings.nominalIuran || 150000;
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -137,7 +137,7 @@ const WargaManager = {
     document.getElementById('warga-nama').value = warga.nama;
     document.getElementById('warga-telp').value = warga.telp || '';
     document.getElementById('warga-status').value = warga.status;
-    document.getElementById('warga-nominal').value = warga.nominalIuran || Store.settings.nominalIuran || 50000;
+    document.getElementById('warga-nominal').value = warga.nominalIuran || Store.settings.nominalIuran || 150000;
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -187,3 +187,7 @@ const WargaManager = {
     }
   }
 };
+
+if (typeof window !== 'undefined') {
+  window.WargaManager = WargaManager;
+}

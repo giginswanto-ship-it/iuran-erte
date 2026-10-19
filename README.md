@@ -34,40 +34,58 @@ Aplikasi web modern, rapi, dan mudah digunakan untuk mengelola keuangan Rukun Te
    - **Rekap Tunggakan**: Mengetahui siapa saja warga yang belum bayar beserta nominalnya.
    - **Format Cetak Laporan (Print / Simpan PDF)**: Lengkap dengan Kop Surat RT dan kolom tanda tangan Ketua RT & Bendahara.
    - **Export ke Excel (.xlsx)**: Mengunduh Buku Kas & Matriks Iuran langsung dalam format spreadsheet.
+   - **Export ke SQL (.sql)**: Mengunduh seluruh skrip database SQL yang siap di-import ke SQLite, MySQL, PostgreSQL, MariaDB.
 
-6. **Pengaturan & Keamanan Data (Offline / LocalStorage)**
-   - Mengubah nama RT, RW, Kelurahan, Kecamatan, Kota, Ketua RT & Bendahara.
-   - Mengubah tarif standar iuran bulanan.
-   - **Cadangan Data (Backup JSON)**: Unduh data kas RT ke file JSON.
-   - **Pemulihan Data (Restore JSON)**: Unggah kembali file backup jika berganti perangkat / komputer.
+6. **Database SQL Otomatis & Keamanan Data (SQL File & LocalStorage)**
+   - **Auto-Sync SQL (`kas_rt.sql`)**: Setiap penambahan data warga, pengeluaran kas, maupun pembayaran iuran warga otomatis disimpan ke berkas fisik `kas_rt.sql`.
+   - **Audit Log Perubahan (`kas_rt_log.sql`)**: Mencatat riwayat setiap perintah SQL (`INSERT`, `UPDATE`, `DELETE`) secara kronologis beserta timestamp.
+   - **Import & Pulihkan SQL**: Mendukung unggah berkas `.sql` untuk pemulihan instan basis data.
+   - **Cadangan Alternatif (JSON)**: Mendukung cadangan dan pemulihan format JSON.
 
 ---
 
 ## 🚀 Cara Menjalankan
 
-Aplikasi ini dapat langsung digunakan **tanpa perlu instalasi software tambahan**:
+Aplikasi ini dapat dijalankan dengan 2 cara praktis:
 
-1. Buka folder `UANG IURAN ERTE`.
-2. Klik dua kali (double click) pada file `index.html` untuk membukanya di browser favorit Anda (Google Chrome, Microsoft Edge, Mozilla Firefox, dll.).
-3. Aplikasi langsung siap digunakan! Data yang Anda masukkan akan otomatis tersimpan di peramban (browser) Anda.
+- **Cara 1 (Rekomendasi - Sinkronisasi SQL Otomatis)**:
+  Klik dua kali pada file `start.bat` (atau ketik `node server.js` di terminal). Browser akan otomatis terbuka di `http://localhost:3000` dan seluruh perubahan data akan tersimpan langsung ke file `kas_rt.sql`.
+- **Cara 2 (Langsung Tanpa Server)**:
+  Klik dua kali pada file `index.html` di peramban Anda (Chrome, Edge, Firefox). Data tersimpan di penyimpanan lokal browser dan dapat diunduh kapan saja dalam bentuk file `.sql`.
 
 ---
 
 ## 📁 Struktur File
 
 ```
-UANG IURAN ERTE/
+ERTE10ZAMRUD/
 ├── index.html              # Antarmuka utama aplikasi
+├── server.js               # Web server & auto-sync database SQL (Node.js)
+├── start.bat               # Shortcut peluncur aplikasi sekali klik
+├── kas_rt.sql              # Berkas fisik database SQL (DDL & DML data lengkap)
+├── kas_rt_log.sql          # Riwayat audit perubahan data (INSERT/UPDATE/DELETE)
 ├── README.md               # Panduan penggunaan
 ├── css/
 │   └── custom.css          # Styling custom & format cetak print-ready
 └── js/
     ├── app.js              # Inisialisasi utama & navigasi
-    ├── store.js            # State management, rumus keuangan & backup/restore
+    ├── store.js            # State management, rumus keuangan & SQL Sync
     ├── dashboard.js        # Ringkasan visual & chart arus kas
     ├── iuran.js            # Matriks 12 bulan & generator kwitansi WA
     ├── pengeluaran.js      # Form & tabel pengeluaran kas
     ├── warga.js            # Manajemen daftar warga / KK
+    ├── pengumuman.js       # Portal Warta & Susunan Pengurus RT
+    ├── suaraWarga.js       # Ruang aspirasi warga (maks. 100 kata)
     ├── laporan.js          # Generator buku kas, cetak PDF, export Excel
     └── dummyData.js        # Data contoh awal
 ```
+
+---
+
+## 💻 Pengembang & Dukungan Teknis
+
+Portal ini dikembangkan dan didukung penuh oleh:
+* **[dutaglobaltech.com](https://dutaglobaltech.com)** — Solusi TI, Pengembangan Perangkat Lunak, dan Cloud Systems.
+* **[mysnaprint.dutaglobaltech.com](https://mysnaprint.dutaglobaltech.com)** — Layanan Percetakan Digital Cepat, Desain, dan Solusi Dokumen.
+
+

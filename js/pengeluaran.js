@@ -59,17 +59,22 @@ const PengeluaranManager = {
     const btnIncome = document.getElementById('tab-btn-pemasukan-lain');
 
     if (tab === 'pengeluaran') {
-      btnExpense.classList.add('bg-white', 'text-slate-800', 'shadow-sm');
-      btnExpense.classList.remove('text-slate-500');
-      btnIncome.classList.remove('bg-white', 'text-slate-800', 'shadow-sm');
-      btnIncome.classList.add('text-slate-500');
+      if (btnExpense) {
+        btnExpense.className = 'px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 text-white font-bold shadow-md shadow-rose-600/20 transition flex items-center gap-1.5';
+      }
+      if (btnIncome) {
+        btnIncome.className = 'px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 font-semibold transition flex items-center gap-1.5';
+      }
     } else {
-      btnIncome.classList.add('bg-white', 'text-slate-800', 'shadow-sm');
-      btnIncome.classList.remove('text-slate-500');
-      btnExpense.classList.remove('bg-white', 'text-slate-800', 'shadow-sm');
-      btnExpense.classList.add('text-slate-500');
+      if (btnIncome) {
+        btnIncome.className = 'px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5';
+      }
+      if (btnExpense) {
+        btnExpense.className = 'px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 font-semibold transition flex items-center gap-1.5';
+      }
     }
 
+    if (window.lucide) lucide.createIcons();
     this.renderTable();
   },
 
@@ -297,3 +302,7 @@ const PengeluaranManager = {
     }
   }
 };
+
+if (typeof window !== 'undefined') {
+  window.PengeluaranManager = PengeluaranManager;
+}

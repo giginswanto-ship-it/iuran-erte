@@ -35,7 +35,6 @@ const IuranManager = {
 
   renderMatrix() {
     const tableBody = document.getElementById('iuran-matrix-body');
-    const tableHeadMonths = document.getElementById('iuran-matrix-head-months');
     if (!tableBody) return;
 
     // Filter warga based on search query
@@ -442,6 +441,11 @@ const IuranManager = {
             <p class="font-bold text-slate-800 text-xs">(${s.namaBendahara})</p>
           </div>
         </div>
+
+        <!-- Developer & Support Credit -->
+        <div class="mt-4 pt-2.5 border-t border-slate-100 text-center text-[9px] text-slate-400">
+          Developed and support by : <strong class="text-slate-600">dutaglobaltech.com</strong> & <strong class="text-slate-600">mysnaprint.dutaglobaltech.com</strong>
+        </div>
       </div>
     `;
 
@@ -458,7 +462,8 @@ const IuranManager = {
       `_Terima kasih atas partisipasi dan kepedulian Bapak/Ibu demi kenyamanan lingkungan bersama._\n\n` +
       `Salam hangat,\n` +
       `*Pengurus ${s.namaRt}*\n` +
-      `Bendahara: ${s.namaBendahara}`;
+      `Bendahara: ${s.namaBendahara}\n\n` +
+      `_Developed and support by : dutaglobaltech.com & mysnaprint.dutaglobaltech.com_`;
 
     // Store waText on modal for copy/send
     const btnCopyWa = document.getElementById('btn-copy-wa-receipt');
@@ -505,7 +510,108 @@ const IuranManager = {
   },
 
   printReceipt() {
-    window.print();
+    const card = document.getElementById('receipt-printable-card');
+    if (!card) {
+      window.print();
+      return;
+    }
+
+    let printFrame = document.getElementById('print-receipt-iframe');
+    if (!printFrame) {
+      printFrame = document.createElement('iframe');
+      printFrame.id = 'print-receipt-iframe';
+      printFrame.style.position = 'fixed';
+      printFrame.style.right = '0';
+      printFrame.style.bottom = '0';
+      printFrame.style.width = '0';
+      printFrame.style.height = '0';
+      printFrame.style.border = '0';
+      printFrame.style.zIndex = '-9999';
+      document.body.appendChild(printFrame);
+    }
+
+    const frameDoc = printFrame.contentWindow.document;
+    frameDoc.open();
+    frameDoc.write(`
+      <!DOCTYPE html>
+      <html lang="id">
+      <head>
+        <meta charset="UTF-8">
+        <title>Bukti Pembayaran Iuran</title>
+        <style>
+          @page {
+            size: 100mm 150mm;
+            margin: 8mm;
+          }
+          * { box-sizing: border-box; }
+          body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111;
+            background: #fff;
+            margin: 0;
+            padding: 10px;
+            font-size: 8.5pt;
+            line-height: 1.35;
+          }
+          .text-center { text-align: center; }
+          .border-b { border-bottom: 1px solid #ddd; }
+          .border-dashed { border-style: dashed; }
+          .border-slate-300 { border-color: #cbd5e1; }
+          .border-slate-100 { border-color: #f1f5f9; }
+          .border-slate-200 { border-color: #e2e8f0; }
+          .pb-4 { padding-bottom: 10px; }
+          .mb-4 { margin-bottom: 10px; }
+          .mb-1 { margin-bottom: 3px; }
+          .mb-8 { margin-bottom: 30px; }
+          .mt-2 { margin-top: 5px; }
+          .mt-3 { margin-top: 8px; }
+          .mt-6 { margin-top: 15px; }
+          .pt-3 { padding-top: 8px; }
+          .py-1 { padding-top: 3px; padding-bottom: 3px; }
+          .py-2\\.5 { padding-top: 6px; padding-bottom: 6px; }
+          .px-3 { padding-left: 8px; padding-right: 8px; }
+          .p-2 { padding: 6px; }
+          .font-bold { font-weight: bold; }
+          .font-semibold { font-weight: 600; }
+          .font-medium { font-weight: 500; }
+          .font-extrabold { font-weight: 800; }
+          .uppercase { text-transform: uppercase; }
+          .tracking-wide { letter-spacing: 0.5px; }
+          .text-base { font-size: 10.5pt; }
+          .text-xs { font-size: 8pt; }
+          .text-\\[10px\\] { font-size: 7.5pt; }
+          .text-slate-800 { color: #1e293b; }
+          .text-slate-700 { color: #334155; }
+          .text-slate-500 { color: #64748b; }
+          .text-slate-400 { color: #94a3b8; }
+          .text-emerald-700 { color: #047857; }
+          .bg-emerald-50 { background-color: #ecfdf5; }
+          .bg-slate-50 { background-color: #f8fafc; }
+          .rounded-full { border-radius: 9999px; }
+          .rounded-xl { border-radius: 8px; }
+          .rounded-lg { border-radius: 6px; }
+          .border { border-width: 1px; }
+          .border-emerald-200 { border-color: #a7f3d0; }
+          .inline-block { display: inline-block; }
+          .flex { display: flex; }
+          .justify-between { justify-content: space-between; }
+          .items-center { align-items: center; }
+          .items-end { align-items: flex-end; }
+          .space-y-2 > * + * { margin-top: 5px; }
+          .leading-tight { line-height: 1.25; }
+        </style>
+      </head>
+      <body>
+        ${card.outerHTML}
+      </body>
+      </html>
+    `);
+    frameDoc.close();
+
+    setTimeout(() => {
+      printFrame.contentWindow.focus();
+      printFrame.contentWindow.print();
+    }, 250);
   },
 
   closeModal(modalId) {
@@ -516,3 +622,7 @@ const IuranManager = {
     }
   }
 };
+
+if (typeof window !== 'undefined') {
+  window.IuranManager = IuranManager;
+}

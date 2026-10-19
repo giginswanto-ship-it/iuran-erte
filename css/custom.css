@@ -92,49 +92,323 @@ body {
   }
 }
 
-/* Print Specific Styles for Professional Reports */
+/* ========================================================
+   MOBILE RESPONSIVENESS & INTERACTIVE ANIMATIONS
+   ======================================================== */
+
+/* Prevent touch delay & tap highlights on mobile */
+button, a, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mobile Sidebar Drawer & Backdrop */
+#sidebar {
+  will-change: transform;
+}
+
+#sidebar-backdrop {
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#sidebar-backdrop.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+}
+
+/* Interactive Animated Hamburger Button */
+.hamburger-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4.5px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.hamburger-btn:hover {
+  background-color: #f1f5f9;
+}
+
+.hamburger-line {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 9999px;
+  background-color: #334155;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.hamburger-btn.is-active .hamburger-line:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+  background-color: #059669;
+}
+
+.hamburger-btn.is-active .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburger-btn.is-active .hamburger-line:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+  background-color: #059669;
+}
+
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px));
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 5px 8px;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 48px;
+  cursor: pointer;
+}
+
+.mobile-nav-item:active {
+  transform: scale(0.95);
+}
+
+.mobile-nav-item.active {
+  color: #047857;
+  font-weight: 800;
+  background-color: #ecfdf5;
+}
+
+.mobile-nav-item.active i {
+  color: #059669;
+}
+
+/* Mobile Scrollable Matrix Container */
+.table-scroll-container {
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+/* Custom scrollbar for mobile swipe tables */
+.table-scroll-container::-webkit-scrollbar {
+  height: 5px;
+}
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+/* Responsive Modal Heights on Small Screens */
+@media (max-width: 640px) {
+  .modal-dialog-responsive {
+    max-height: calc(100vh - 2rem) !important;
+    margin: auto 0.75rem !important;
+    width: calc(100% - 1.5rem) !important;
+  }
+}
+
+/* ========================================================
+   STYLING TABEL LAPORAN (SCREEN PREVIEW)
+   ======================================================== */
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.775rem;
+  line-height: 1.45;
+  background-color: #ffffff;
+  color: #1e293b;
+  margin-bottom: 1.25rem;
+}
+
+.print-table th,
+.print-table td {
+  border: 1px solid #cbd5e1;
+  padding: 7px 9px;
+  vertical-align: middle;
+}
+
+.print-table th {
+  background-color: #f1f5f9;
+  font-weight: 700;
+  color: #0f172a;
+  border-bottom: 2px solid #94a3b8;
+}
+
+.print-table tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.print-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.print-table tfoot td {
+  border-top: 2px solid #475569;
+  background-color: #f8fafc;
+  font-weight: 700;
+}
+
+/* ========================================================
+   PRINT SPECIFIC STYLES (A4, PAGINATION, ZERO OVERLAP)
+   ======================================================== */
 @media print {
-  body * {
-    visibility: hidden;
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm;
   }
 
-  #printable-area, #printable-area * {
-    visibility: visible;
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  #printable-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    padding: 20px;
-    background: white;
-    color: black;
-  }
-
-  .no-print {
+  /* Sembunyikan elemen non-cetak */
+  #sidebar,
+  header,
+  #toast-container,
+  .no-print,
+  .tab-section,
+  #modal-quick-pay,
+  #modal-batch-pay,
+  #modal-kwitansi,
+  #modal-expense,
+  #modal-warga,
+  #modal-view-sql {
     display: none !important;
   }
 
-  /* Table styling for print */
-  .print-table {
-    width: 100%;
-    border-collapse: collapse;
+  /* Reset layout modal agar mengalir normal dalam halaman cetak */
+  #modal-print-report {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    inset: auto !important;
+    z-index: auto !important;
   }
 
-  .print-table th, .print-table td {
-    border: 1px solid #333 !important;
-    padding: 6px 8px !important;
-    font-size: 10pt !important;
+  #modal-print-report > div {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  .print-table th {
-    background-color: #f2f2f2 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  #modal-print-report .bg-slate-100 {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    display: block !important;
   }
 
-  .page-break {
-    page-break-after: always;
+  #print-report-content {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    display: block !important;
+  }
+
+  #printable-area {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    color: #000000 !important;
+  }
+
+  /* Aturan Paginate Tabel - Mencegah Tumpukan / Overlapping */
+  table.print-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto !important;
+    margin-bottom: 14px !important;
+  }
+
+  table.print-table thead {
+    display: table-header-group !important;
+  }
+
+  table.print-table tfoot {
+    display: table-footer-group !important;
+    page-break-inside: avoid !important;
+  }
+
+  table.print-table tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+    height: auto !important;
+  }
+
+  table.print-table th,
+  table.print-table td {
+    border: 1px solid #111111 !important;
+    padding: 5px 6px !important;
+    font-size: 8pt !important;
+    line-height: 1.35 !important;
+    color: #000000 !important;
+    vertical-align: middle !important;
+  }
+
+  table.print-table th {
+    background-color: #f1f5f9 !important;
+    font-weight: bold !important;
+    text-align: center !important;
+  }
+
+  .summary-box, .ttd-section {
+    page-break-inside: avoid !important;
   }
 }
