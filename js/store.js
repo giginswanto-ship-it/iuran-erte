@@ -152,7 +152,7 @@ const Store = {
             localStorage.setItem(STORAGE_KEYS.SUARA_WARGA, JSON.stringify(this.suaraWarga));
           }
           const timeStr = new Date().toLocaleTimeString('id-ID');
-          this.updateSqlStatus('synced', `Tersimpan di kas_rt.sql (${timeStr})`);
+          this.updateSqlStatus('synced', `Tersimpan di kas-rt.sql (${timeStr})`);
           this.notify();
           return;
         }
@@ -173,7 +173,7 @@ const Store = {
 
   // --- AUTOMATIC SQL SYNC ---
   syncToSQL(action = 'UPDATE_DATA', specificSql = '') {
-    this.updateSqlStatus('saving', 'Menyimpan ke kas_rt.sql...');
+    this.updateSqlStatus('saving', 'Menyimpan ke kas-rt.sql...');
 
     if (this.syncTimeout) clearTimeout(this.syncTimeout);
     this.syncTimeout = setTimeout(async () => {
@@ -195,7 +195,7 @@ const Store = {
 
         if (res.ok) {
           const timeStr = new Date().toLocaleTimeString('id-ID');
-          this.updateSqlStatus('synced', `Tersimpan di kas_rt.sql (${timeStr})`);
+          this.updateSqlStatus('synced', `Tersimpan di kas-rt.sql (${timeStr})`);
         } else {
           this.updateSqlStatus('offline', 'Penyimpanan lokal (Server offline)');
         }
@@ -212,12 +212,12 @@ const Store = {
     if (badge) {
       if (status === 'synced') {
         badge.className = 'hidden md:flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium rounded-xl shadow-xs transition';
-        badge.title = 'Semua data dan perubahan berhasil disimpan ke berkas kas_rt.sql';
+        badge.title = 'Semua data dan perubahan berhasil disimpan ke berkas kas-rt.sql';
       } else if (status === 'saving') {
         badge.className = 'hidden md:flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium rounded-xl shadow-xs transition';
       } else {
         badge.className = 'hidden md:flex items-center gap-1.5 px-3 py-1 bg-slate-100 border border-slate-300 text-slate-600 text-xs font-medium rounded-xl shadow-xs transition';
-        badge.title = 'Data tersimpan di browser. Jalankan server lokal untuk auto-sync ke kas_rt.sql';
+        badge.title = 'Data tersimpan di browser. Jalankan server lokal untuk auto-sync ke kas-rt.sql';
       }
     }
   },
@@ -994,11 +994,11 @@ const Store = {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `kas_rt_${new Date().toISOString().split('T')[0]}.sql`;
+    a.download = `kas-rt_${new Date().toISOString().split('T')[0]}.sql`;
     a.click();
     URL.revokeObjectURL(url);
     if (typeof showToast === 'function') {
-      showToast("Berkas database SQL (kas_rt.sql) berhasil diunduh!", "success");
+      showToast("Berkas database SQL (kas-rt.sql) berhasil diunduh!", "success");
     }
   },
 
@@ -1039,7 +1039,7 @@ const Store = {
         this.saveSuaraWarga(false);
         this.savePengurus(false);
         this.syncToSQL('RESTORE_JSON_BACKUP', `-- Pulihkan cadangan JSON`);
-        return { success: true, message: "Data berhasil dipulihkan & disimpan ke kas_rt.sql!" };
+        return { success: true, message: "Data berhasil dipulihkan & disimpan ke kas-rt.sql!" };
       }
       return { success: false, message: "Format file cadangan tidak valid." };
     } catch (e) {

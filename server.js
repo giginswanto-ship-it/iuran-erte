@@ -5,6 +5,7 @@ const path = require('path');
 const PORT = process.env.PORT || 3000;
 const BASE_DIR = __dirname;
 const SQL_FILE = path.join(BASE_DIR, 'kas_rt.sql');
+const SQL_FILE_HYPHEN = path.join(BASE_DIR, 'kas-rt.sql');
 const SQL_LOG_FILE = path.join(BASE_DIR, 'kas_rt_log.sql');
 const JSON_FILE = path.join(BASE_DIR, 'kas_rt_data.json');
 
@@ -391,10 +392,11 @@ function getInitialData() {
 
 // Ensure SQL Files Exist on Startup
 function initializeStorage() {
-  if (!fs.existsSync(JSON_FILE) && !fs.existsSync(SQL_FILE)) {
+  if (!fs.existsSync(JSON_FILE) && !fs.existsSync(SQL_FILE) && !fs.existsSync(SQL_FILE_HYPHEN)) {
     const initData = getInitialData();
     const fullSql = generateFullSQL(initData);
     fs.writeFileSync(SQL_FILE, fullSql, 'utf-8');
+    fs.writeFileSync(SQL_FILE_HYPHEN, fullSql, 'utf-8');
     fs.writeFileSync(JSON_FILE, JSON.stringify(initData, null, 2), 'utf-8');
     
     const initLog = `-- ========================================================\n` +
@@ -403,15 +405,16 @@ function initializeStorage() {
       `-- Waktu Inisialisasi: ${new Date().toISOString()}\n` +
       `-- ========================================================\n\n` +
       `-- [${new Date().toISOString()}] INISIALISASI DATA AWAL\n` +
-      `INSERT INTO log_perubahan (aksi, keterangan) VALUES ('INIT', 'Inisialisasi sistem kas RT dan pembuatan berkas kas_rt.sql');\n\n`;
+      `INSERT INTO log_perubahan (aksi, keterangan) VALUES ('INIT', 'Inisialisasi sistem kas RT dan pembuatan berkas kas-rt.sql');\n\n`;
     fs.writeFileSync(SQL_LOG_FILE, initLog, 'utf-8');
-    console.log(`[SQL Storage] Berhasil membuat berkas SQL awal: ${SQL_FILE}`);
-  } else if (!fs.existsSync(SQL_FILE) && fs.existsSync(JSON_FILE)) {
+    console.log(`[SQL Storage] Berhasil membuat berkas SQL awal: ${SQL_FILE} & ${SQL_FILE_HYPHEN}`);
+  } else if (fs.existsSync(JSON_FILE) && (!fs.existsSync(SQL_FILE) || !fs.existsSync(SQL_FILE_HYPHEN))) {
     try {
       const data = JSON.parse(fs.readFileSync(JSON_FILE, 'utf-8'));
       const fullSql = generateFullSQL(data);
       fs.writeFileSync(SQL_FILE, fullSql, 'utf-8');
-      console.log(`[SQL Storage] Berkas kas_rt.sql diperbarui dari cache JSON.`);
+      fs.writeFileSync(SQL_FILE_HYPHEN, fullSql, 'utf-8');
+      console.log(`[SQL Storage] Berkas kas-rt.sql & kas_rt.sql diperbarui dari cache JSON.`);
     } catch (e) {
       console.error('[SQL Storage Error]', e);
     }
@@ -644,6 +647,12 @@ const server = http.createServer((req, res) => {
         data = JSON.parse(fs.readFileSync(JSON_FILE, 'utf-8'));
       } catch (e) {}
     }
+    if (!data && fs.existsSync(SQL_FILE_HYPHEN)) {
+      try {
+        const sql = fs.readFileSync(SQL_FILE_HYPHEN, 'utf-8');
+        data = parseSQLDump(sql);
+      } catch (e) {}
+    }
     if (!data && fs.existsSync(SQL_FILE)) {
       try {
         const sql = fs.readFileSync(SQL_FILE, 'utf-8');
@@ -654,7 +663,7 @@ const server = http.createServer((req, res) => {
       data = getInitialData();
     }
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ success: true, data, sqlFile: 'kas_rt.sql' }));
+    res.end(JSON.stringify({ success: true, data, sqlFile: 'kas-rt.sql' }));
     return;
   }
 
@@ -689,8 +698,9 @@ const server = http.createServer((req, res) => {
           suaraWarga: (Array.isArray(suaraWarga) && suaraWarga.length > 0) ? suaraWarga : existingSuaraWarga
         };
 
-        // 1. Write full SQL file
+        // 1. Write full SQL files (both kas-rt.sql and kas_rt.sql)
         const fullSql = generateFullSQL(fullData);
+        fs.writeFileSync(SQL_FILE_HYPHEN, fullSql, 'utf-8');
         fs.writeFileSync(SQL_FILE, fullSql, 'utf-8');
 
         // 2. Cache JSON file
@@ -703,17 +713,17 @@ const server = http.createServer((req, res) => {
         if (logSql && logSql.trim()) {
           logEntry += `${logSql.trim()}\n`;
         }
-        logEntry += `INSERT INTO log_perubahan (waktu, aksi, keterangan) VALUES ('${timestamp}', ${escapeSql(actionDesc)}, ${escapeSql('Sinkronisasi data ke kas_rt.sql')});\n\n`;
+        logEntry += `INSERT INTO log_perubahan (waktu, aksi, keterangan) VALUES ('${timestamp}', ${escapeSql(actionDesc)}, ${escapeSql('Sinkronisasi data ke kas-rt.sql & kas_rt.sql')});\n\n`;
 
         fs.appendFileSync(SQL_LOG_FILE, logEntry, 'utf-8');
 
-        console.log(`[SQL Sync] Perubahan berhasil disimpan ke ${SQL_FILE} [Aksi: ${actionDesc}]`);
+        console.log(`[SQL Sync] Perubahan berhasil disimpan ke ${SQL_FILE_HYPHEN} & ${SQL_FILE} [Aksi: ${actionDesc}]`);
 
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({
           success: true,
-          message: 'Data dan perubahan berhasil disimpan ke kas_rt.sql',
-          sqlFile: 'kas_rt.sql',
+          message: 'Data dan perubahan berhasil disimpan ke kas-rt.sql',
+          sqlFile: 'kas-rt.sql',
           timestamp
         }));
       } catch (err) {
@@ -726,18 +736,20 @@ const server = http.createServer((req, res) => {
   }
 
   // ----------------------------------------------------------------
-  // API ROUTE 3: GET /api/sql (Download / View kas_rt.sql)
+  // API ROUTE 3: GET /api/sql (Download / View kas-rt.sql / kas_rt.sql)
   // ----------------------------------------------------------------
-  if (req.method === 'GET' && (pathname === '/api/sql' || pathname === '/kas_rt.sql')) {
-    if (fs.existsSync(SQL_FILE)) {
+  if (req.method === 'GET' && (pathname === '/api/sql' || pathname === '/kas_rt.sql' || pathname === '/kas-rt.sql')) {
+    const fileToServe = (pathname === '/kas-rt.sql' || fs.existsSync(SQL_FILE_HYPHEN)) ? SQL_FILE_HYPHEN : SQL_FILE;
+    if (fs.existsSync(fileToServe)) {
+      const filename = (pathname === '/kas_rt.sql') ? 'kas_rt.sql' : 'kas-rt.sql';
       res.writeHead(200, {
         'Content-Type': 'text/plain; charset=utf-8',
-        'Content-Disposition': 'inline; filename="kas_rt.sql"'
+        'Content-Disposition': `inline; filename="${filename}"`
       });
-      fs.createReadStream(SQL_FILE).pipe(res);
+      fs.createReadStream(fileToServe).pipe(res);
     } else {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('Berkas kas_rt.sql belum tersedia.');
+      res.end('Berkas SQL belum tersedia.');
     }
     return;
   }
@@ -775,7 +787,8 @@ const server = http.createServer((req, res) => {
           throw new Error('Tidak ditemukan data valid dalam berkas SQL yang diunggah.');
         }
 
-        // Simpan
+        // Simpan ke kedua file
+        fs.writeFileSync(SQL_FILE_HYPHEN, sqlText, 'utf-8');
         fs.writeFileSync(SQL_FILE, sqlText, 'utf-8');
         fs.writeFileSync(JSON_FILE, JSON.stringify(parsed, null, 2), 'utf-8');
 
@@ -787,7 +800,7 @@ const server = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({
           success: true,
-          message: 'Berkas SQL berhasil dipulihkan!',
+          message: 'Berkas SQL berhasil dipulihkan ke kas-rt.sql & kas_rt.sql!',
           data: parsed
         }));
       } catch (err) {
@@ -827,7 +840,7 @@ server.listen(PORT, () => {
   console.log(`=======================================================`);
   console.log(`  Sistem Kas RT & Sinkronisasi SQL Aktif`);
   console.log(`  Alamat Web : http://localhost:${PORT}`);
-  console.log(`  File SQL   : ${SQL_FILE}`);
+  console.log(`  File SQL   : ${SQL_FILE_HYPHEN} & ${SQL_FILE}`);
   console.log(`  File Log   : ${SQL_LOG_FILE}`);
   console.log(`=======================================================`);
 });

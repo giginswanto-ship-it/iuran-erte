@@ -1,15 +1,21 @@
 -- ========================================================
--- SISTEM KAS, IURAN, PENGUMUMAN & SUARA WARGA RT
--- Berkas Database SQL Lengkap: kas_rt.sql
--- Tanggal Migrasi Penuh: 2026-10-19 01:39:35
--- Kompatibel dengan: SQLite, MySQL, MariaDB, PostgreSQL
--- Total Data: 2153 baris data (200 KK Warga, 1927 Transaksi, 15 Pengurus, 5 Pengumuman, 5 Aspirasi)
+-- SISTEM KAS, IURAN & ADMINISTRASI WARGA RT 10 / RW 10
+-- Berkas Database SQL Utama: kas-rt.sql
+-- Tanggal Ekspor / Migrasi : 2026-10-19 02:13:11
+-- Format Kompatibilitas    : SQLite, MySQL, MariaDB, PostgreSQL
+-- Total Rekod Data         : 2153 Baris Data
+--   - Pengaturan RT        : 1 Profil Aktif
+--   - Daftar Warga (KK)    : 200 Kepala Keluarga
+--   - Riwayat Kas & Iuran  : 1927 Catatan Transaksi
+--   - Personalia Pengurus  : 15 Pengurus RT
+--   - Warta Pengumuman     : 5 Pengumuman Resmi
+--   - Suara & Aspirasi     : 5 Aspirasi Warga
 -- ========================================================
 
 PRAGMA foreign_keys = OFF;
 
 -- --------------------------------------------------------
--- 1. STRUKTUR TABEL: settings (Pengaturan & Profil RT)
+-- 1. STRUKTUR TABEL: settings (Pengaturan & Profil Wilayah RT)
 -- --------------------------------------------------------
 DROP TABLE IF EXISTS settings;
 CREATE TABLE settings (
@@ -27,7 +33,7 @@ CREATE TABLE settings (
 );
 
 -- --------------------------------------------------------
--- 2. STRUKTUR TABEL: warga (Daftar Warga / KK Kompleks Blok J)
+-- 2. STRUKTUR TABEL: warga (Daftar Kepala Keluarga / KK)
 -- --------------------------------------------------------
 DROP TABLE IF EXISTS warga;
 CREATE TABLE warga (
@@ -40,7 +46,7 @@ CREATE TABLE warga (
 );
 
 -- --------------------------------------------------------
--- 3. STRUKTUR TABEL: transaksi (Buku Kas Masuk, Keluar & Iuran)
+-- 3. STRUKTUR TABEL: transaksi (Buku Kas Masuk, Keluar & Iuran Warga)
 -- --------------------------------------------------------
 DROP TABLE IF EXISTS transaksi;
 CREATE TABLE transaksi (
@@ -57,7 +63,7 @@ CREATE TABLE transaksi (
 );
 
 -- --------------------------------------------------------
--- 4. STRUKTUR TABEL: pengurus (Susunan Pengurus RT 10 / RW 10)
+-- 4. STRUKTUR TABEL: pengurus (Susunan Organisasi & Personalia RT)
 -- --------------------------------------------------------
 DROP TABLE IF EXISTS pengurus;
 CREATE TABLE pengurus (
@@ -74,7 +80,7 @@ CREATE TABLE pengurus (
 );
 
 -- --------------------------------------------------------
--- 5. STRUKTUR TABEL: pengumuman (Warta Resmi Pengurus RT)
+-- 5. STRUKTUR TABEL: pengumuman (Warta & Edaran Resmi RT)
 -- --------------------------------------------------------
 DROP TABLE IF EXISTS pengumuman;
 CREATE TABLE pengumuman (
@@ -89,7 +95,7 @@ CREATE TABLE pengumuman (
 );
 
 -- --------------------------------------------------------
--- 6. STRUKTUR TABEL: suara_warga (Aspirasi & Masukan Warga)
+-- 6. STRUKTUR TABEL: suara_warga (Aspirasi, Masukan & Keluhan Warga)
 -- --------------------------------------------------------
 DROP TABLE IF EXISTS suara_warga;
 CREATE TABLE suara_warga (
@@ -121,7 +127,7 @@ CREATE TABLE IF NOT EXISTS log_perubahan (
 );
 
 -- ========================================================
--- MEMASUKKAN 100% DATA LENGKAP KE DALAM DATABASE
+-- MEMASUKKAN SELURUH DATA LOKAL KE DALAM DATABASE
 -- ========================================================
 BEGIN TRANSACTION;
 
@@ -137,7 +143,7 @@ INSERT INTO settings (id, nama_rt, kelurahan, kecamatan, kota, nama_ketua_rt, na
   150000,
   'Kebersihan & Sampah: Rp 75.000, Keamanan & Satpam: Rp 50.000, Kas RT: Rp 25.000',
   2026,
-  '2026-10-19 01:39:35'
+  '2026-10-19 02:13:11'
 );
 
 -- 2. Data Warga (200 KK Warga Kompleks Blok J1 - J10)
