@@ -5,6 +5,7 @@
 const IuranManager = {
   currentYear: new Date().getFullYear(),
   searchQuery: "",
+  selectedBlok: "all",
   selectedWargaForPayment: null,
 
   init() {
@@ -23,6 +24,15 @@ const IuranManager = {
       });
     }
 
+    // Blok filter selector
+    const blokSelect = document.getElementById('iuran-filter-blok');
+    if (blokSelect) {
+      blokSelect.addEventListener('change', (e) => {
+        this.selectedBlok = e.target.value;
+        this.renderMatrix();
+      });
+    }
+
     // Search input
     const searchInput = document.getElementById('iuran-search-warga');
     if (searchInput) {
@@ -37,8 +47,14 @@ const IuranManager = {
     const tableBody = document.getElementById('iuran-matrix-body');
     if (!tableBody) return;
 
-    // Filter warga based on search query
-    const filteredWarga = Store.warga.filter(w => 
+    // Filter warga based on selected blok and search query
+    let filteredWarga = Store.warga;
+    if (this.selectedBlok && this.selectedBlok !== 'all') {
+      const blokRegex = new RegExp(`\\b${this.selectedBlok.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}\\b`, 'i');
+      filteredWarga = filteredWarga.filter(w => blokRegex.test(w.blok || ''));
+    }
+
+    filteredWarga = filteredWarga.filter(w => 
       w.nama.toLowerCase().includes(this.searchQuery) ||
       w.blok.toLowerCase().includes(this.searchQuery)
     );
