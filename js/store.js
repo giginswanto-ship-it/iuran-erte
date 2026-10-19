@@ -489,7 +489,10 @@ const Store = {
   },
 
   updatePengurus(id, updatedFields) {
-    const idx = this.pengurus.findIndex(p => p.id === id);
+    if (!Array.isArray(this.pengurus) || this.pengurus.length === 0) {
+      this.pengurus = typeof DEFAULT_PENGURUS_RT10 !== 'undefined' ? JSON.parse(JSON.stringify(DEFAULT_PENGURUS_RT10)) : [];
+    }
+    const idx = this.pengurus.findIndex(p => String(p.id) === String(id));
     if (idx !== -1) {
       this.pengurus[idx] = { ...this.pengurus[idx], ...updatedFields };
       this.savePengurus(true);
@@ -499,7 +502,10 @@ const Store = {
   },
 
   deletePengurus(id) {
-    const idx = this.pengurus.findIndex(p => p.id === id);
+    if (!Array.isArray(this.pengurus) || this.pengurus.length === 0) {
+      this.pengurus = typeof DEFAULT_PENGURUS_RT10 !== 'undefined' ? JSON.parse(JSON.stringify(DEFAULT_PENGURUS_RT10)) : [];
+    }
+    const idx = this.pengurus.findIndex(p => String(p.id) === String(id));
     if (idx !== -1) {
       const deleted = this.pengurus.splice(idx, 1);
       this.savePengurus(true);

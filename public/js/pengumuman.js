@@ -130,6 +130,47 @@ const PengumumanManager = {
         this.handleAddAnnouncementSubmit();
       });
     }
+
+    // Modal Add / Edit Pengurus Form
+    const formPengurus = document.getElementById('form-pengurus');
+    if (formPengurus) {
+      formPengurus.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handlePengurusSubmit();
+      });
+    }
+
+    // Modal Delete Pengurus Form
+    const formDelete = document.getElementById('form-delete-pengurus');
+    if (formDelete) {
+      formDelete.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleDeletePengurusConfirm();
+      });
+    }
+
+    // Delegated click handler for edit and delete pengurus buttons
+    document.addEventListener('click', (e) => {
+      const editBtn = e.target.closest('.btn-edit-pengurus, [data-action="edit-pengurus"]');
+      if (editBtn) {
+        e.preventDefault();
+        const id = editBtn.getAttribute('data-id');
+        if (id) {
+          PengumumanManager.openEditPengurusModal(id);
+        }
+        return;
+      }
+
+      const deleteBtn = e.target.closest('.btn-delete-pengurus, [data-action="delete-pengurus"]');
+      if (deleteBtn) {
+        e.preventDefault();
+        const id = deleteBtn.getAttribute('data-id');
+        if (id) {
+          PengumumanManager.openDeletePengurusModal(id);
+        }
+        return;
+      }
+    });
   },
 
   switchSubTab(tab) {
@@ -348,7 +389,14 @@ const PengumumanManager = {
     if (typeof Store !== 'undefined' && Array.isArray(Store.pengurus) && Store.pengurus.length > 0) {
       return Store.pengurus;
     }
-    return typeof DEFAULT_PENGURUS_RT10 !== 'undefined' ? DEFAULT_PENGURUS_RT10 : [];
+    if (typeof DEFAULT_PENGURUS_RT10 !== 'undefined' && Array.isArray(DEFAULT_PENGURUS_RT10) && DEFAULT_PENGURUS_RT10.length > 0) {
+      if (typeof Store !== 'undefined') {
+        Store.pengurus = JSON.parse(JSON.stringify(DEFAULT_PENGURUS_RT10));
+        Store.savePengurus(false);
+      }
+      return DEFAULT_PENGURUS_RT10;
+    }
+    return [];
   },
 
   renderSusunanPengurus() {
@@ -423,21 +471,24 @@ const PengumumanManager = {
           <!-- Bottom Contact & Action Buttons (Edit, Hapus, WA) -->
           <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-1.5">
-              <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center gap-1.5 border border-emerald-200 transition" title="Hubungi WhatsApp ${p.nama}">
-                <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-700 font-bold text-xs flex items-center gap-1 border border-emerald-200 transition cursor-pointer" title="Hubungi via WhatsApp">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
                 <span>WA</span>
-                <span class="text-[11px] font-semibold text-emerald-800 border-l border-emerald-200 pl-1.5 truncate max-w-[110px]">${p.telp || '-'}</span>
               </a>
+              <div class="text-[11px] text-slate-500 font-medium flex items-center gap-1 truncate max-w-[100px] sm:max-w-[120px]" title="${p.telp}">
+                <i data-lucide="phone" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                <span class="truncate">${p.telp || '-'}</span>
+              </div>
             </div>
 
             <div class="flex items-center gap-1.5">
-              <button type="button" onclick="PengumumanManager.openEditPengurusModal('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs flex items-center gap-1 border border-blue-200 transition cursor-pointer" title="Edit Data Pengurus (PIN: 1234)">
-                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                <span>Edit</span>
+              <button type="button" data-action="edit-pengurus" data-id="${p.id}" onclick="PengumumanManager.openEditPengurusModal('${p.id}')" class="btn-edit-pengurus px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-700 font-bold text-xs flex items-center gap-1 border border-blue-200 transition cursor-pointer select-none" title="Edit Data Pengurus (PIN: 1234)">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5 pointer-events-none"></i>
+                <span class="pointer-events-none">Edit</span>
               </button>
-              <button type="button" onclick="PengumumanManager.openDeletePengurusModal('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs flex items-center gap-1 border border-rose-200 transition cursor-pointer" title="Hapus Data Pengurus (PIN: 1234)">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                <span>Hapus</span>
+              <button type="button" data-action="delete-pengurus" data-id="${p.id}" onclick="PengumumanManager.openDeletePengurusModal('${p.id}')" class="btn-delete-pengurus px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 font-bold text-xs flex items-center gap-1 border border-rose-200 transition cursor-pointer select-none" title="Hapus Data Pengurus (PIN: 1234)">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i>
+                <span class="pointer-events-none">Hapus</span>
               </button>
             </div>
           </div>
@@ -481,41 +532,68 @@ const PengumumanManager = {
     const modal = document.getElementById('modal-pengurus');
     if (!modal) return;
 
-    document.getElementById('form-pengurus').reset();
-    document.getElementById('pengurus-id').value = '';
-    document.getElementById('modal-pengurus-title').textContent = 'Tambah Personalia Pengurus RT';
-    document.getElementById('btn-save-pengurus-text').textContent = 'Simpan Pengurus';
-    document.getElementById('pengurus-pin').value = '1234';
+    const form = document.getElementById('form-pengurus');
+    if (form) form.reset();
+
+    const setVal = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    };
+
+    setVal('pengurus-id', '');
+    setVal('pengurus-pin', '1234');
+
+    const titleEl = document.getElementById('modal-pengurus-title');
+    if (titleEl) titleEl.textContent = 'Tambah Personalia Pengurus RT';
+
+    const btnTextEl = document.getElementById('btn-save-pengurus-text');
+    if (btnTextEl) btnTextEl.textContent = 'Simpan Pengurus';
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    modal.style.display = 'flex';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+
     if (window.lucide) lucide.createIcons();
   },
 
   openEditPengurusModal(id) {
     const list = this.getPengurusData();
-    const item = list.find(p => p.id === id);
+    const item = list.find(p => String(p.id) === String(id));
     if (!item) return;
 
     const modal = document.getElementById('modal-pengurus');
     if (!modal) return;
 
-    document.getElementById('pengurus-id').value = item.id;
-    document.getElementById('pengurus-nama').value = item.nama;
-    document.getElementById('pengurus-jabatan').value = item.jabatan;
-    document.getElementById('pengurus-kategori').value = item.kategori || 'inti';
-    document.getElementById('pengurus-blok').value = item.blok || '';
-    document.getElementById('pengurus-telp').value = item.telp || '';
-    document.getElementById('pengurus-badge').value = item.badge || '';
-    document.getElementById('pengurus-theme-color').value = item.badgeColor || 'blue';
-    document.getElementById('pengurus-tugas').value = item.tugas || '';
-    document.getElementById('pengurus-pin').value = '1234';
+    const setVal = (fieldId, val) => {
+      const el = document.getElementById(fieldId);
+      if (el) el.value = val !== undefined && val !== null ? val : '';
+    };
 
-    document.getElementById('modal-pengurus-title').textContent = 'Edit Personalia Pengurus RT';
-    document.getElementById('btn-save-pengurus-text').textContent = 'Perbarui Pengurus';
+    setVal('pengurus-id', item.id);
+    setVal('pengurus-nama', item.nama);
+    setVal('pengurus-jabatan', item.jabatan);
+    setVal('pengurus-kategori', item.kategori || 'inti');
+    setVal('pengurus-blok', item.blok || '');
+    setVal('pengurus-telp', item.telp || '');
+    setVal('pengurus-badge', item.badge || '');
+    setVal('pengurus-theme-color', item.badgeColor || 'blue');
+    setVal('pengurus-tugas', item.tugas || '');
+    setVal('pengurus-pin', '1234');
+
+    const titleEl = document.getElementById('modal-pengurus-title');
+    if (titleEl) titleEl.textContent = 'Edit Personalia Pengurus RT';
+
+    const btnTextEl = document.getElementById('btn-save-pengurus-text');
+    if (btnTextEl) btnTextEl.textContent = 'Perbarui Pengurus';
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    modal.style.display = 'flex';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+
     if (window.lucide) lucide.createIcons();
   },
 
@@ -578,20 +656,33 @@ const PengumumanManager = {
 
   openDeletePengurusModal(id) {
     const list = this.getPengurusData();
-    const item = list.find(p => p.id === id);
+    const item = list.find(p => String(p.id) === String(id));
     if (!item) return;
 
     const modal = document.getElementById('modal-delete-pengurus');
     if (!modal) return;
 
-    document.getElementById('delete-pengurus-id').value = item.id;
-    document.getElementById('delete-pengurus-nama-label').textContent = item.nama;
-    document.getElementById('delete-pengurus-jabatan-label').textContent = item.jabatan;
-    document.getElementById('delete-pengurus-blok-label').textContent = `${item.blok} • ${item.telp}`;
-    document.getElementById('delete-pengurus-pin').value = '1234';
+    const setVal = (fieldId, val) => {
+      const el = document.getElementById(fieldId);
+      if (el) el.value = val !== undefined && val !== null ? val : '';
+    };
+    const setText = (fieldId, text) => {
+      const el = document.getElementById(fieldId);
+      if (el) el.textContent = text || '-';
+    };
+
+    setVal('delete-pengurus-id', item.id);
+    setText('delete-pengurus-nama-label', item.nama);
+    setText('delete-pengurus-jabatan-label', item.jabatan);
+    setText('delete-pengurus-blok-label', `${item.blok || ''} • ${item.telp || ''}`);
+    setVal('delete-pengurus-pin', '1234');
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    modal.style.display = 'flex';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+
     if (window.lucide) lucide.createIcons();
   },
 
@@ -716,6 +807,8 @@ const PengumumanManager = {
     if (modal) {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+      modal.style.display = 'none';
+      modal.style.visibility = 'hidden';
     }
   },
 
@@ -788,4 +881,7 @@ const PengumumanManager = {
 
 if (typeof window !== 'undefined') {
   window.PengumumanManager = PengumumanManager;
+  window.openEditPengurusModal = (id) => PengumumanManager.openEditPengurusModal(id);
+  window.openDeletePengurusModal = (id) => PengumumanManager.openDeletePengurusModal(id);
+  window.openAddPengurusModal = () => PengumumanManager.openAddPengurusModal();
 }

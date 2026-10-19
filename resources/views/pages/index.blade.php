@@ -2561,7 +2561,7 @@
         </button>
       </div>
 
-      <form onsubmit="event.preventDefault(); PengumumanManager.handleDeletePengurusConfirm();" class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+      <form id="form-delete-pengurus" onsubmit="event.preventDefault(); PengumumanManager.handleDeletePengurusConfirm();" class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 text-xs">
         <input type="hidden" id="delete-pengurus-id">
 
         <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 leading-relaxed">
