@@ -37,6 +37,8 @@ function generateFullSQL(data) {
   const wargaList = data.warga || [];
   const transaksiList = data.transaksi || [];
   const pengurusList = data.pengurus || [];
+  const pengumumanList = data.pengumuman || [];
+  const suaraWargaList = data.suaraWarga || [];
 
   let sql = `-- ========================================================\n`;
   sql += `-- SISTEM KAS & IURAN WARGA RT\n`;
@@ -128,6 +130,44 @@ function generateFullSQL(data) {
   sql += `  tugas TEXT\n`;
   sql += `);\n\n`;
 
+  // 6. Table Pengumuman
+  sql += `-- --------------------------------------------------------\n`;
+  sql += `-- 6. STRUKTUR TABEL: pengumuman (Warta Resmi Pengurus RT)\n`;
+  sql += `-- --------------------------------------------------------\n`;
+  sql += `DROP TABLE IF EXISTS pengumuman;\n`;
+  sql += `CREATE TABLE pengumuman (\n`;
+  sql += `  id VARCHAR(50) PRIMARY KEY,\n`;
+  sql += `  judul VARCHAR(255) NOT NULL,\n`;
+  sql += `  kategori VARCHAR(100) NOT NULL,\n`;
+  sql += `  badge_color VARCHAR(50) DEFAULT 'emerald',\n`;
+  sql += `  is_pinned INTEGER DEFAULT 0,\n`;
+  sql += `  tanggal DATE NOT NULL,\n`;
+  sql += `  pengirim VARCHAR(150) NOT NULL,\n`;
+  sql += `  isi TEXT NOT NULL\n`;
+  sql += `);\n\n`;
+
+  // 7. Table Suara Warga
+  sql += `-- --------------------------------------------------------\n`;
+  sql += `-- 7. STRUKTUR TABEL: suara_warga (Aspirasi & Suara Warga RT)\n`;
+  sql += `-- --------------------------------------------------------\n`;
+  sql += `DROP TABLE IF EXISTS suara_warga;\n`;
+  sql += `CREATE TABLE suara_warga (\n`;
+  sql += `  id VARCHAR(50) PRIMARY KEY,\n`;
+  sql += `  judul VARCHAR(255) NOT NULL,\n`;
+  sql += `  kategori VARCHAR(100) NOT NULL,\n`;
+  sql += `  kategori_badge VARCHAR(50) DEFAULT 'purple',\n`;
+  sql += `  pengirim VARCHAR(150) NOT NULL,\n`;
+  sql += `  blok VARCHAR(50) NOT NULL,\n`;
+  sql += `  is_anonim INTEGER DEFAULT 0,\n`;
+  sql += `  tanggal DATE NOT NULL,\n`;
+  sql += `  isi TEXT NOT NULL,\n`;
+  sql += `  dukungan INTEGER DEFAULT 0,\n`;
+  sql += `  status VARCHAR(50) DEFAULT 'Menunggu',\n`;
+  sql += `  tanggapan_penjawab VARCHAR(150),\n`;
+  sql += `  tanggapan_tanggal DATE,\n`;
+  sql += `  tanggapan_pesan TEXT\n`;
+  sql += `);\n\n`;
+
   // DML: INSERT DATA
   sql += `-- ========================================================\n`;
   sql += `-- MEMASUKKAN DATA KE DALAM DATABASE\n`;
@@ -181,6 +221,29 @@ function generateFullSQL(data) {
       return `  (${escapeSql(p.id)}, ${escapeSql(p.jabatan)}, ${escapeSql(p.kategori)}, ${escapeSql(p.nama)}, ${escapeSql(p.blok)}, ${escapeSql(p.telp)}, ${escapeSql(p.badge)}, ${escapeSql(p.badgeColor)}, ${escapeSql(p.avatarBg)}, ${escapeSql(p.tugas)})${isLast ? ';' : ','}`;
     });
     sql += pValues.join('\n') + `\n\n`;
+  }
+
+  // Insert Pengumuman
+  if (pengumumanList.length > 0) {
+    sql += `-- Data Pengumuman Resmi (${pengumumanList.length} warta)\n`;
+    sql += `INSERT INTO pengumuman (id, judul, kategori, badge_color, is_pinned, tanggal, pengirim, isi) VALUES\n`;
+    const aValues = pengumumanList.map((a, idx) => {
+      const isLast = idx === pengumumanList.length - 1;
+      return `  (${escapeSql(a.id)}, ${escapeSql(a.judul)}, ${escapeSql(a.kategori)}, ${escapeSql(a.badgeColor || 'emerald')}, ${a.isPinned ? 1 : 0}, ${escapeSql(a.tanggal)}, ${escapeSql(a.pengirim)}, ${escapeSql(a.isi)})${isLast ? ';' : ','}`;
+    });
+    sql += aValues.join('\n') + `\n\n`;
+  }
+
+  // Insert Suara Warga
+  if (suaraWargaList.length > 0) {
+    sql += `-- Data Suara Warga (${suaraWargaList.length} aspirasi)\n`;
+    sql += `INSERT INTO suara_warga (id, judul, kategori, kategori_badge, pengirim, blok, is_anonim, tanggal, isi, dukungan, status, tanggapan_penjawab, tanggapan_tanggal, tanggapan_pesan) VALUES\n`;
+    const sValues = suaraWargaList.map((s, idx) => {
+      const isLast = idx === suaraWargaList.length - 1;
+      const t = s.tanggapan || {};
+      return `  (${escapeSql(s.id)}, ${escapeSql(s.judul)}, ${escapeSql(s.kategori)}, ${escapeSql(s.kategoriBadge || 'purple')}, ${escapeSql(s.pengirim)}, ${escapeSql(s.blok)}, ${s.isAnonim ? 1 : 0}, ${escapeSql(s.tanggal)}, ${escapeSql(s.isi)}, ${Number(s.dukungan) || 0}, ${escapeSql(s.status || 'Menunggu')}, ${escapeSql(t.penjawab || null)}, ${escapeSql(t.tanggal || null)}, ${escapeSql(t.pesan || null)})${isLast ? ';' : ','}`;
+    });
+    sql += sValues.join('\n') + `\n\n`;
   }
 
   sql += `COMMIT;\n`;
@@ -361,7 +424,9 @@ function parseSQLDump(sqlContent) {
     settings: {},
     warga: [],
     transaksi: [],
-    pengurus: []
+    pengurus: [],
+    pengumuman: [],
+    suaraWarga: []
   };
 
   // Helper to parse values string: ('val1', 2, NULL, 'val\'3')
@@ -496,6 +561,58 @@ function parseSQLDump(sqlContent) {
     });
   }
 
+  // Extract pengumuman
+  const pengumumanBlock = sqlContent.match(/INSERT\s+INTO\s+pengumuman\s*\([^)]*\)\s*VALUES\s*([\s\S]+?);/i);
+  if (pengumumanBlock) {
+    const lines = pengumumanBlock[1].split(/\),\s*\(/);
+    lines.forEach((line) => {
+      const cleaned = line.replace(/^\s*\(/, '').replace(/\)\s*$/, '');
+      const r = parseRow(cleaned);
+      if (r.length >= 8) {
+        result.pengumuman.push({
+          id: String(r[0]),
+          judul: String(r[1]),
+          kategori: String(r[2]),
+          badgeColor: String(r[3] || 'emerald'),
+          isPinned: Number(r[4]) === 1,
+          tanggal: String(r[5]),
+          pengirim: String(r[6]),
+          isi: String(r[7])
+        });
+      }
+    });
+  }
+
+  // Extract suara_warga
+  const suaraBlock = sqlContent.match(/INSERT\s+INTO\s+suara_warga\s*\([^)]*\)\s*VALUES\s*([\s\S]+?);/i);
+  if (suaraBlock) {
+    const lines = suaraBlock[1].split(/\),\s*\(/);
+    lines.forEach((line) => {
+      const cleaned = line.replace(/^\s*\(/, '').replace(/\)\s*$/, '');
+      const r = parseRow(cleaned);
+      if (r.length >= 11) {
+        result.suaraWarga.push({
+          id: String(r[0]),
+          judul: String(r[1]),
+          kategori: String(r[2]),
+          kategoriBadge: String(r[3] || 'purple'),
+          pengirim: String(r[4]),
+          blok: String(r[5]),
+          isAnonim: Number(r[6]) === 1,
+          tanggal: String(r[7]),
+          isi: String(r[8]),
+          dukungan: Number(r[9]) || 0,
+          status: String(r[10] || 'Menunggu'),
+          tanggapan: (r[11] && r[13]) ? {
+            penjawab: String(r[11]),
+            tanggal: String(r[12] || ''),
+            pesan: String(r[13])
+          } : null
+        });
+      }
+    });
+  }
+
   return result;
 }
 
@@ -550,20 +667,26 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       try {
         const payload = JSON.parse(body);
-        const { settings, warga, transaksi, pengurus, action, logSql } = payload;
+        const { settings, warga, transaksi, pengurus, pengumuman, suaraWarga, action, logSql } = payload;
         
         let existingPengurus = [];
+        let existingPengumuman = [];
+        let existingSuaraWarga = [];
         if (fs.existsSync(JSON_FILE)) {
           try {
             const cached = JSON.parse(fs.readFileSync(JSON_FILE, 'utf-8'));
             if (Array.isArray(cached.pengurus)) existingPengurus = cached.pengurus;
+            if (Array.isArray(cached.pengumuman)) existingPengumuman = cached.pengumuman;
+            if (Array.isArray(cached.suaraWarga)) existingSuaraWarga = cached.suaraWarga;
           } catch (e) {}
         }
         const fullData = { 
           settings, 
           warga, 
           transaksi, 
-          pengurus: (Array.isArray(pengurus) && pengurus.length > 0) ? pengurus : existingPengurus 
+          pengurus: (Array.isArray(pengurus) && pengurus.length > 0) ? pengurus : existingPengurus,
+          pengumuman: (Array.isArray(pengumuman) && pengumuman.length > 0) ? pengumuman : existingPengumuman,
+          suaraWarga: (Array.isArray(suaraWarga) && suaraWarga.length > 0) ? suaraWarga : existingSuaraWarga
         };
 
         // 1. Write full SQL file

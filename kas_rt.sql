@@ -1,14 +1,15 @@
 -- ========================================================
--- SISTEM KAS & IURAN WARGA RT
--- Berkas Database SQL: kas_rt.sql
--- Terakhir Diperbarui: 2026-10-19 01:31:10
+-- SISTEM KAS, IURAN, PENGUMUMAN & SUARA WARGA RT
+-- Berkas Database SQL Lengkap: kas_rt.sql
+-- Tanggal Migrasi Penuh: 2026-10-19 01:39:35
 -- Kompatibel dengan: SQLite, MySQL, MariaDB, PostgreSQL
+-- Total Data: 2153 baris data (200 KK Warga, 1927 Transaksi, 15 Pengurus, 5 Pengumuman, 5 Aspirasi)
 -- ========================================================
 
 PRAGMA foreign_keys = OFF;
 
 -- --------------------------------------------------------
--- 1. STRUKTUR TABEL: settings (Pengaturan RT)
+-- 1. STRUKTUR TABEL: settings (Pengaturan & Profil RT)
 -- --------------------------------------------------------
 DROP TABLE IF EXISTS settings;
 CREATE TABLE settings (
@@ -26,7 +27,7 @@ CREATE TABLE settings (
 );
 
 -- --------------------------------------------------------
--- 2. STRUKTUR TABEL: warga (Daftar Warga / KK)
+-- 2. STRUKTUR TABEL: warga (Daftar Warga / KK Kompleks Blok J)
 -- --------------------------------------------------------
 DROP TABLE IF EXISTS warga;
 CREATE TABLE warga (
@@ -39,7 +40,7 @@ CREATE TABLE warga (
 );
 
 -- --------------------------------------------------------
--- 3. STRUKTUR TABEL: transaksi (Buku Kas & Iuran)
+-- 3. STRUKTUR TABEL: transaksi (Buku Kas Masuk, Keluar & Iuran)
 -- --------------------------------------------------------
 DROP TABLE IF EXISTS transaksi;
 CREATE TABLE transaksi (
@@ -56,18 +57,7 @@ CREATE TABLE transaksi (
 );
 
 -- --------------------------------------------------------
--- 4. STRUKTUR TABEL: log_perubahan (Riwayat Perubahan Data)
--- --------------------------------------------------------
-CREATE TABLE IF NOT EXISTS log_perubahan (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  waktu TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  aksi VARCHAR(100),
-  keterangan TEXT,
-  query_sql TEXT
-);
-
--- --------------------------------------------------------
--- 5. STRUKTUR TABEL: pengurus (Susunan Pengurus RT)
+-- 4. STRUKTUR TABEL: pengurus (Susunan Pengurus RT 10 / RW 10)
 -- --------------------------------------------------------
 DROP TABLE IF EXISTS pengurus;
 CREATE TABLE pengurus (
@@ -83,12 +73,59 @@ CREATE TABLE pengurus (
   tugas TEXT
 );
 
+-- --------------------------------------------------------
+-- 5. STRUKTUR TABEL: pengumuman (Warta Resmi Pengurus RT)
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS pengumuman;
+CREATE TABLE pengumuman (
+  id VARCHAR(50) PRIMARY KEY,
+  judul VARCHAR(255) NOT NULL,
+  kategori VARCHAR(100) NOT NULL,
+  badge_color VARCHAR(50) DEFAULT 'emerald',
+  is_pinned INTEGER DEFAULT 0,
+  tanggal DATE NOT NULL,
+  pengirim VARCHAR(150) NOT NULL,
+  isi TEXT NOT NULL
+);
+
+-- --------------------------------------------------------
+-- 6. STRUKTUR TABEL: suara_warga (Aspirasi & Masukan Warga)
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS suara_warga;
+CREATE TABLE suara_warga (
+  id VARCHAR(50) PRIMARY KEY,
+  judul VARCHAR(255) NOT NULL,
+  kategori VARCHAR(100) NOT NULL,
+  kategori_badge VARCHAR(50) DEFAULT 'purple',
+  pengirim VARCHAR(150) NOT NULL,
+  blok VARCHAR(50) NOT NULL,
+  is_anonim INTEGER DEFAULT 0,
+  tanggal DATE NOT NULL,
+  isi TEXT NOT NULL,
+  dukungan INTEGER DEFAULT 0,
+  status VARCHAR(50) DEFAULT 'Menunggu',
+  tanggapan_penjawab VARCHAR(150),
+  tanggapan_tanggal DATE,
+  tanggapan_pesan TEXT
+);
+
+-- --------------------------------------------------------
+-- 7. STRUKTUR TABEL: log_perubahan (Riwayat Audit Perubahan SQL)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS log_perubahan (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  waktu TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  aksi VARCHAR(100),
+  keterangan TEXT,
+  query_sql TEXT
+);
+
 -- ========================================================
--- MEMASUKKAN DATA KE DALAM DATABASE
+-- MEMASUKKAN 100% DATA LENGKAP KE DALAM DATABASE
 -- ========================================================
 BEGIN TRANSACTION;
 
--- Data Pengaturan RT
+-- 1. Data Pengaturan RT
 INSERT INTO settings (id, nama_rt, kelurahan, kecamatan, kota, nama_ketua_rt, nama_bendahara, nominal_iuran, rincian_iuran, tahun_aktif, updated_at) VALUES (
   1,
   'RT 10 / RW 10',
@@ -100,10 +137,10 @@ INSERT INTO settings (id, nama_rt, kelurahan, kecamatan, kota, nama_ketua_rt, na
   150000,
   'Kebersihan & Sampah: Rp 75.000, Keamanan & Satpam: Rp 50.000, Kas RT: Rp 25.000',
   2026,
-  '2026-10-19 01:31:10'
+  '2026-10-19 01:39:35'
 );
 
--- Data Warga (200 KK)
+-- 2. Data Warga (200 KK Warga Kompleks Blok J1 - J10)
 INSERT INTO warga (id, blok, nama, telp, status, nominal_iuran) VALUES
   ('w-1', 'Blok J1 No. 01', 'Bambang Sutrisno (Ketua RT)', '081319876543', 'Tetap', 150000),
   ('w-2', 'Blok J1 No. 02', 'Hendra Wijaya (Bendahara)', '082129753086', 'Tetap', 150000),
@@ -306,7 +343,7 @@ INSERT INTO warga (id, blok, nama, telp, status, nominal_iuran) VALUES
   ('w-199', 'Blok J10 No. 19', 'Arif Setiawan', '081385432057', 'Tetap', 150000),
   ('w-200', 'Blok J10 No. 20', 'Hadi Lubis', '082195308600', 'Tetap', 150000);
 
--- Data Transaksi Kas & Iuran (1927 catatan)
+-- 3. Data Transaksi Kas & Iuran (1927 catatan transaksi)
 INSERT INTO transaksi (id, tanggal, jenis, kategori, uraian, nominal, warga_id, bulan_iuran, tahun_iuran, metode) VALUES
   ('tx-1', '2026-01-01', 'pemasukan', 'Saldo Awal Kas', 'Saldo kas sisa pembukuan tahun sebelumnya RT 10 / RW 10', 15000000, NULL, NULL, NULL, 'Tunai'),
   ('tx-7', '2026-01-04', 'iuran', 'Iuran Warga', 'Iuran Bulan 1/2026 - Blok J1 No. 06 (Bayu Kurniawan)', 150000, 'w-6', 1, 2026, 'Tunai'),
@@ -2236,7 +2273,7 @@ INSERT INTO transaksi (id, tanggal, jenis, kategori, uraian, nominal, warga_id, 
   ('tx-1922', '2026-10-20', 'pengeluaran', 'Konsumsi Rapat / Kerja Bakti', 'Konsumsi Kerja Bakti Lingkungan & Rapat Koordinasi Blok J Bulan 10', 750000, NULL, NULL, NULL, 'Tunai'),
   ('tx-1792373470225-737', '2026-10-19', 'iuran', 'Iuran Warga', 'Iuran Bulan Januari 2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT))', 150000, 'w-1', 1, 2026, 'Tunai / Cash');
 
--- Data Susunan Pengurus RT (15 personalia)
+-- 4. Data Susunan Pengurus RT (15 personalia)
 INSERT INTO pengurus (id, jabatan, kategori, nama, blok, telp, badge, badge_color, avatar_bg, tugas) VALUES
   ('pengurus-1', 'Ketua RT 10', 'inti', 'Bpk. Bambang Sutrisno', 'Blok J1 No. 01', '081319876543', 'Pimpinan Utama', 'emerald', 'bg-emerald-600', 'Memimpin seluruh penyelenggaraan kepengurusan RT 10, mengayomi 200 KK warga Blok J1–J10, menjaga kerukunan, serta menjadi jembatan koordinasi resmi dengan RW 10 dan Kelurahan.'),
   ('pengurus-2', 'Sekretaris RT 10', 'inti', 'Bpk. Agus Santoso', 'Blok J1 No. 03', '085239629629', 'Administrasi & Legal', 'blue', 'bg-blue-600', 'Pengelolaan administrasi kependudukan, penerbitan Surat Pengantar RT (domisili, SKTM, pengantar nikah/kelahiran), arsip surat resmi, dan dokumentasi rapat warga.'),
@@ -2253,6 +2290,65 @@ INSERT INTO pengurus (id, jabatan, kategori, nama, blok, telp, badge, badge_colo
   ('pengurus-13', 'Koordinator Wilayah Blok J1 - J3', 'blok', 'Bpk. Haryanto', 'Blok J2 No. 11', '081233221101', 'Komang Blok J1-J3', 'slate', 'bg-slate-600', 'Penghubung komunikasi warga Blok J1 s/d J3 (No. 01 - 20) dengan Pengurus Inti, sosialisasi program kerja, dan pendataan warga baru.'),
   ('pengurus-14', 'Koordinator Wilayah Blok J4 - J7', 'blok', 'Bpk. Wahyu Nugroho', 'Blok J5 No. 14', '081233221102', 'Komang Blok J4-J7', 'slate', 'bg-slate-600', 'Penghubung komunikasi warga Blok J4 s/d J7 (No. 01 - 20) dengan Pengurus Inti, pemantauan ketertiban jalan blok, dan fasilitator urusan lingkungan.'),
   ('pengurus-15', 'Koordinator Wilayah Blok J8 - J10', 'blok', 'Bpk. Eko Prasetyo', 'Blok J9 No. 16', '081233221103', 'Komang Blok J8-J10', 'slate', 'bg-slate-600', 'Penghubung komunikasi warga Blok J8 s/d J10 (No. 01 - 20) dengan Pengurus Inti, penyaluran logistik kerja bakti, dan pendataan warga penghuni kontrak.');
+
+-- 5. Data Pengumuman Resmi (5 warta)
+INSERT INTO pengumuman (id, judul, kategori, badge_color, is_pinned, tanggal, pengirim, isi) VALUES
+  ('ann-1', 'Penetapan & Mekanisme Pembayaran Iuran Bulanan Warga Tahun 2026 (Rp 150.000 / KK)', 'Iuran & Keuangan', 'emerald', 1, '2026-01-10', 'Bpk. Bambang Sutrisno (Ketua RT 10)', 'Assalamu''alaikum Wr. Wb. dan Salam Sejahtera untuk seluruh Bapak/Ibu Warga RT 10 / RW 10 Kompleks Blok J1 s/d J10.
+
+Berdasarkan Berita Acara Musyawarah Warga RT 10 / RW 10, bersama ini kami sampaikan penetapan dan alokasi Iuran Lingkungan Bulanan tahun 2026 sebesar Rp 150.000,- per KK dengan rincian:
+1. Pos Pengangkutan Sampah & Kebersihan: Rp 75.000,- (jadwal angkut truk sampah DLHK 3x seminggu).
+2. Pos Keamanan Lingkungan & Satpam 24 Jam: Rp 50.000,- (honor & operasional satpam, sistem portal malam).
+3. Pos Kas Pemeliharaan Lingkungan: Rp 25.000,- (perawatan PJU, CCTV, taman bermain, dan balai warga).
+
+Mekanisme Pembayaran:
+- Pembayaran iuran dapat dilakukan mulai tanggal 1 s/d 10 setiap bulannya.
+- Metode pembayaran: Setor Tunai langsung ke Bendahara (Bpk. Hendra Wijaya - Blok J1 No. 02), Transfer Bank, atau Scan QRIS Kas RT.
+- Seluruh rekap pembayaran tercatat transparan dan dapat dicek setiap saat di aplikasi Kas RT ini.
+
+Terima kasih atas partisipasi dan kepedulian seluruh warga dalam menjaga lingkungan RT 10 tetap aman, tertib, dan guyub.'),
+  ('ann-2', 'Kerja Bakti Massal Pengerukan Saluran Drainase Menjelang Puncak Musim Penghujan', 'Kerja Bakti & Lingkungan', 'teal', 1, '2026-10-18', 'Seksi Kebersihan - Bpk. Rudi Hermawan', 'Kepada Yth. Bapak-Bapak & Pemuda Warga RT 10 / RW 10 Kompleks Blok J.
+
+Untuk mengantisipasi genangan air dan mencegah penyumbatan endapan sedimen got pada musim hujan, Pengurus RT mengundang seluruh warga untuk bergotong-royong pada:
+📅 Hari / Tanggal : Minggu, 25 Oktober 2026
+⏰ Waktu          : Pukul 07.00 WIB s/d 10.30 WIB
+📍 Titik Kumpul   : Balai Warga RT 10 (Depan Taman Blok J)
+🧹 Fokus Kegiatan :
+1. Pengerukan lumpur dan sampah pada saluran drainase utama Blok J1 s/d J10.
+2. Pemangkasan dahan pohon liar yang rimbun dan membahayakan kabel listrik / PJU.
+3. Gerakan 3M Plus Pemberantasan Sarang Nyamuk (PSN) serentak di pekarangan rumah.
+
+Disediakan sarapan pagi bersama (Nasi Uduk & Kopi Panas). Warga dihimbau membawa cangkul, sekop, atau sapu lidi masing-masing.'),
+  ('ann-3', 'Pemberlakuan Jam Malam Portal & Wajib Lapor Tamu 1x24 Jam di Blok J', 'Keamanan & Ketertiban', 'rose', 0, '2026-10-12', 'Seksi Keamanan - Bpk. Slamet Riyadi', 'Demi menjaga keamanan dan kenyamanan istirahat warga, disampaikan ketentuan ketertiban portal lingkungan:
+1. Portal sayap Barat (akses tembus RW sebelah) akan ditutup setiap malam mulai pukul 22.00 WIB hingga 05.00 WIB pagi.
+2. Seluruh akses keluar-masuk pada malam hari dialihkan melalui Gerbang Utama Pos Satpam 1 (Depan Blok J1).
+3. Ojek Online / Kurir pengantaran barang/makanan di atas pukul 23.00 WIB wajib melapor dan menitipkan identitas di pos satpam.
+4. Tamu atau kerabat yang menginap lebih dari 1x24 jam wajib dilaporkan ke Ketua RT atau Koordinator Blok setempat.
+5. Nomor Hotline Keamanan Pos Satpam RT 10: 0812-8899-1001 (Aktif 24 Jam).'),
+  ('ann-4', 'Pelayanan Posyandu Balita & Posbindu Kesehatan Lansia Pos Mawar RT 10', 'Sosial & Kesehatan', 'purple', 0, '2026-10-06', 'Ibu Hj. Siti Rahmawati (Koordinator PKK/Sosial)', 'Pemberitahuan Pelayanan Kesehatan Rutin Bulanan Posyandu Mawar RT 10:
+🗓 Hari / Tanggal : Sabtu, 24 Oktober 2026
+⏰ Waktu          : 08.30 - 11.30 WIB
+📍 Lokasi         : Gazebo Taman Blok J5
+
+Layanan Kesehatan:
+- Balita: Penimbangan berat badan, pengukuran tinggi badan, imunisasi rutin, vitamin A, dan pembagian PMT (Pemberian Makanan Tambahan) gizi seimbang.
+- Lansia & Dewasa: Pemeriksaan tensi darah, penimbangan, serta cek kadar gula darah, kolesterol, dan asam urat gratis.
+
+Bagi keluarga yang memiliki balita atau orang tua lanjut usia, dimohon kehadirannya dengan membawa Buku KIA / KMS masing-masing.'),
+  ('ann-5', 'Turnamen Santai Bulutangkis Ganda Putra Antar-Blok Kompleks RT 10', 'Olahraga & Kepemudaan', 'cyan', 0, '2026-10-01', 'Bpk. Fajar Ramadhan (Koordinator Pemuda)', 'Salam Olahraga dan Salam Guyub Rukun!
+Untuk mempererat keakraban antar-warga Kompleks Blok J1 s/d J10, Karang Taruna & Seksi Olahraga mengadakan Pertandingan Persahabatan Bulutangkis Ganda Putra:
+🏸 Jadwal : Setiap Sabtu Malam, Mulai Pukul 19.30 WIB
+📍 Tempat : Lapangan Bulutangkis RT 10 (Samping Balai Warga)
+👥 Peserta: Terbuka untuk seluruh bapak-bapak dan remaja pria warga RT 10.
+
+Sistem pertandingan santai (ganda diacak), disediakan shuttlecock dan minuman segar. Pendaftaran gratis melalui Koordinator Blok masing-masing.');
+
+-- 6. Data Suara Warga (5 aspirasi warga)
+INSERT INTO suara_warga (id, judul, kategori, kategori_badge, pengirim, blok, is_anonim, tanggal, isi, dukungan, status, tanggapan_penjawab, tanggapan_tanggal, tanggapan_pesan) VALUES
+  ('suara-1', 'Penerangan Lampu Jalan (PJU) Padam di Pertigaan Blok J3', 'Keluhan Fasilitas', 'rose', 'Warga Blok J3', 'Blok J3', 0, '2026-10-17', 'Lampu PJU di pertigaan antara Blok J3 No. 08 dan No. 10 sudah padam sejak dua hari lalu. Kondisi jalan cukup gelap saat malam hari dan rawan bagi pejalan kaki atau anak-anak yang pulang dari masjid. Mohon Seksi Sarpras dapat segera memeriksa bohlam atau kabel jalurnya. Terima kasih.', 14, 'Selesai', 'Bpk. Ir. Dedi Supriyadi (Seksi Sarpras)', '2026-10-18', 'Terima kasih laporannya. Tim sarpras sudah mengganti bohlam LED 40W baru tadi sore. Saat ini lampu PJU di pertigaan Blok J3 sudah menyala terang kembali normal.'),
+  ('suara-2', 'Ide Penyediaan Rak Pojok Baca Anak di Gazebo Taman Blok J5', 'Ide & Inovasi', 'amber', 'Ibu Ratna Dewi', 'Blok J5 No. 06', 0, '2026-10-14', 'Usul agar di Gazebo Taman Blok J5 dibuatkan lemari buku mini atau Pojok Baca Anak. Banyak anak-anak bermain di taman sore hari. Kami para ibu siap menyumbangkan buku cerita, komik edukasi, dan majalah anak yang masih layak baca agar anak-anak tidak kecanduan gadget.', 28, 'Ditindaklanjuti', 'Bpk. Bambang Sutrisno (Ketua RT 10)', '2026-10-15', 'Ide yang sangat positif! Kami sudah koordinasikan dengan Seksi Sarpras untuk membuat rak gantung kayu tahan air di gazebo minggu depan. Warga yang ingin donasi buku bisa diserahkan ke Balai RT.'),
+  ('suara-3', 'Kritik Ketertiban Parkir Mobil Tamu di Badan Jalan Utama Blok J6', 'Kritik Konstruktif', 'purple', 'Warga Kompleks', 'Blok J6', 1, '2026-10-10', 'Mohon ketegasan pengurus mengenai mobil tamu warga yang parkir di kedua sisi badan jalan Blok J6 saat akhir pekan. Jalur jadi sangat sempit sehingga mobil sampah dan ambulans kesulitan lewat. Sebaiknya tamu diarahkan parkir di lapangan serbaguna jika carport penuh.', 19, 'Ditindaklanjuti', 'Bpk. Slamet Riyadi (Koordinator Keamanan)', '2026-10-11', 'Masukan diterima dengan baik. Regu satpam sudah diinstruksikan memasang kerucut pembatas jalan dan mengarahkan mobil tamu parkir di bahu lapangan bulutangkis Blok J8.'),
+  ('suara-4', 'Kabar Bahagia: Kelahiran Putra Pertama Keluarga Bpk. Rizky Blok J2', 'Berita Warga', 'blue', 'Bpk. Agus Santoso (Sekretaris)', 'Blok J2 No. 14', 0, '2026-10-05', 'Alhamdulillah telah lahir dengan selamat putra pertama dari warga kita Bpk. Rizky & Ibu Sarah (Blok J2 No. 14) pada hari Minggu kemarin dengan berat 3.2 kg dalam kondisi sehat walafiat. Semoga menjadi anak yang sholeh dan membanggakan keluarga.', 35, 'Selesai', 'Ibu Hj. Siti Rahmawati (Seksi Sosial)', '2026-10-06', 'Selamat kepada keluarga Bpk. Rizky. Tim perwakilan ibu-ibu PKK dan seksi sosial RT 10 telah menyerahkan bingkisan tali asih warga.'),
+  ('suara-5', 'Usul Fasilitas Pembayaran Iuran Menggunakan Notifikasi WhatsApp', 'Usulan Warga', 'teal', 'Indra Pratama', 'Blok J8 No. 04', 0, '2026-09-28', 'Usul untuk sistem iuran, apakah memungkinkan ada broadcast pengingat atau kirim bukti bayar otomatis via WhatsApp setelah warga bayar? Supaya warga yang sibuk kerja tidak lupa jadwal bayar sebelum tanggal 10.', 22, 'Ditanggapi', 'Bpk. Hendra Wijaya (Bendahara)', '2026-09-29', 'Terima kasih sarannya. Saat ini kwitansi digital sudah bisa langsung dibagikan ke WhatsApp warga lewat tombol ''Kirim WA'' di tabel iuran. Fitur pengingat berkala sedang kami persiapkan.');
 
 COMMIT;
 PRAGMA foreign_keys = ON;

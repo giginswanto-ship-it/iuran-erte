@@ -24919,5 +24919,149 @@
       "avatarBg": "bg-slate-600",
       "tugas": "Penghubung komunikasi warga Blok J8 s/d J10 (No. 01 - 20) dengan Pengurus Inti, penyaluran logistik kerja bakti, dan pendataan warga penghuni kontrak."
     }
+  ],
+  "pengumuman": [
+    {
+      "id": "ann-1",
+      "judul": "Penetapan & Mekanisme Pembayaran Iuran Bulanan Warga Tahun 2026 (Rp 150.000 / KK)",
+      "kategori": "Iuran & Keuangan",
+      "badgeColor": "emerald",
+      "isPinned": true,
+      "tanggal": "2026-01-10",
+      "pengirim": "Bpk. Bambang Sutrisno (Ketua RT 10)",
+      "isi": "Assalamu'alaikum Wr. Wb. dan Salam Sejahtera untuk seluruh Bapak/Ibu Warga RT 10 / RW 10 Kompleks Blok J1 s/d J10.\n\nBerdasarkan Berita Acara Musyawarah Warga RT 10 / RW 10, bersama ini kami sampaikan penetapan dan alokasi Iuran Lingkungan Bulanan tahun 2026 sebesar Rp 150.000,- per KK dengan rincian:\n1. Pos Pengangkutan Sampah & Kebersihan: Rp 75.000,- (jadwal angkut truk sampah DLHK 3x seminggu).\n2. Pos Keamanan Lingkungan & Satpam 24 Jam: Rp 50.000,- (honor & operasional satpam, sistem portal malam).\n3. Pos Kas Pemeliharaan Lingkungan: Rp 25.000,- (perawatan PJU, CCTV, taman bermain, dan balai warga).\n\nMekanisme Pembayaran:\n- Pembayaran iuran dapat dilakukan mulai tanggal 1 s/d 10 setiap bulannya.\n- Metode pembayaran: Setor Tunai langsung ke Bendahara (Bpk. Hendra Wijaya - Blok J1 No. 02), Transfer Bank, atau Scan QRIS Kas RT.\n- Seluruh rekap pembayaran tercatat transparan dan dapat dicek setiap saat di aplikasi Kas RT ini.\n\nTerima kasih atas partisipasi dan kepedulian seluruh warga dalam menjaga lingkungan RT 10 tetap aman, tertib, dan guyub."
+    },
+    {
+      "id": "ann-2",
+      "judul": "Kerja Bakti Massal Pengerukan Saluran Drainase Menjelang Puncak Musim Penghujan",
+      "kategori": "Kerja Bakti & Lingkungan",
+      "badgeColor": "teal",
+      "isPinned": true,
+      "tanggal": "2026-10-18",
+      "pengirim": "Seksi Kebersihan - Bpk. Rudi Hermawan",
+      "isi": "Kepada Yth. Bapak-Bapak & Pemuda Warga RT 10 / RW 10 Kompleks Blok J.\n\nUntuk mengantisipasi genangan air dan mencegah penyumbatan endapan sedimen got pada musim hujan, Pengurus RT mengundang seluruh warga untuk bergotong-royong pada:\n📅 Hari / Tanggal : Minggu, 25 Oktober 2026\n⏰ Waktu          : Pukul 07.00 WIB s/d 10.30 WIB\n📍 Titik Kumpul   : Balai Warga RT 10 (Depan Taman Blok J)\n🧹 Fokus Kegiatan :\n1. Pengerukan lumpur dan sampah pada saluran drainase utama Blok J1 s/d J10.\n2. Pemangkasan dahan pohon liar yang rimbun dan membahayakan kabel listrik / PJU.\n3. Gerakan 3M Plus Pemberantasan Sarang Nyamuk (PSN) serentak di pekarangan rumah.\n\nDisediakan sarapan pagi bersama (Nasi Uduk & Kopi Panas). Warga dihimbau membawa cangkul, sekop, atau sapu lidi masing-masing."
+    },
+    {
+      "id": "ann-3",
+      "judul": "Pemberlakuan Jam Malam Portal & Wajib Lapor Tamu 1x24 Jam di Blok J",
+      "kategori": "Keamanan & Ketertiban",
+      "badgeColor": "rose",
+      "isPinned": false,
+      "tanggal": "2026-10-12",
+      "pengirim": "Seksi Keamanan - Bpk. Slamet Riyadi",
+      "isi": "Demi menjaga keamanan dan kenyamanan istirahat warga, disampaikan ketentuan ketertiban portal lingkungan:\n1. Portal sayap Barat (akses tembus RW sebelah) akan ditutup setiap malam mulai pukul 22.00 WIB hingga 05.00 WIB pagi.\n2. Seluruh akses keluar-masuk pada malam hari dialihkan melalui Gerbang Utama Pos Satpam 1 (Depan Blok J1).\n3. Ojek Online / Kurir pengantaran barang/makanan di atas pukul 23.00 WIB wajib melapor dan menitipkan identitas di pos satpam.\n4. Tamu atau kerabat yang menginap lebih dari 1x24 jam wajib dilaporkan ke Ketua RT atau Koordinator Blok setempat.\n5. Nomor Hotline Keamanan Pos Satpam RT 10: 0812-8899-1001 (Aktif 24 Jam)."
+    },
+    {
+      "id": "ann-4",
+      "judul": "Pelayanan Posyandu Balita & Posbindu Kesehatan Lansia Pos Mawar RT 10",
+      "kategori": "Sosial & Kesehatan",
+      "badgeColor": "purple",
+      "isPinned": false,
+      "tanggal": "2026-10-06",
+      "pengirim": "Ibu Hj. Siti Rahmawati (Koordinator PKK/Sosial)",
+      "isi": "Pemberitahuan Pelayanan Kesehatan Rutin Bulanan Posyandu Mawar RT 10:\n🗓 Hari / Tanggal : Sabtu, 24 Oktober 2026\n⏰ Waktu          : 08.30 - 11.30 WIB\n📍 Lokasi         : Gazebo Taman Blok J5\n\nLayanan Kesehatan:\n- Balita: Penimbangan berat badan, pengukuran tinggi badan, imunisasi rutin, vitamin A, dan pembagian PMT (Pemberian Makanan Tambahan) gizi seimbang.\n- Lansia & Dewasa: Pemeriksaan tensi darah, penimbangan, serta cek kadar gula darah, kolesterol, dan asam urat gratis.\n\nBagi keluarga yang memiliki balita atau orang tua lanjut usia, dimohon kehadirannya dengan membawa Buku KIA / KMS masing-masing."
+    },
+    {
+      "id": "ann-5",
+      "judul": "Turnamen Santai Bulutangkis Ganda Putra Antar-Blok Kompleks RT 10",
+      "kategori": "Olahraga & Kepemudaan",
+      "badgeColor": "cyan",
+      "isPinned": false,
+      "tanggal": "2026-10-01",
+      "pengirim": "Bpk. Fajar Ramadhan (Koordinator Pemuda)",
+      "isi": "Salam Olahraga dan Salam Guyub Rukun!\nUntuk mempererat keakraban antar-warga Kompleks Blok J1 s/d J10, Karang Taruna & Seksi Olahraga mengadakan Pertandingan Persahabatan Bulutangkis Ganda Putra:\n🏸 Jadwal : Setiap Sabtu Malam, Mulai Pukul 19.30 WIB\n📍 Tempat : Lapangan Bulutangkis RT 10 (Samping Balai Warga)\n👥 Peserta: Terbuka untuk seluruh bapak-bapak dan remaja pria warga RT 10.\n\nSistem pertandingan santai (ganda diacak), disediakan shuttlecock dan minuman segar. Pendaftaran gratis melalui Koordinator Blok masing-masing."
+    }
+  ],
+  "suaraWarga": [
+    {
+      "id": "suara-1",
+      "judul": "Penerangan Lampu Jalan (PJU) Padam di Pertigaan Blok J3",
+      "kategori": "Keluhan Fasilitas",
+      "kategoriBadge": "rose",
+      "pengirim": "Warga Blok J3",
+      "blok": "Blok J3",
+      "isAnonim": false,
+      "tanggal": "2026-10-17",
+      "isi": "Lampu PJU di pertigaan antara Blok J3 No. 08 dan No. 10 sudah padam sejak dua hari lalu. Kondisi jalan cukup gelap saat malam hari dan rawan bagi pejalan kaki atau anak-anak yang pulang dari masjid. Mohon Seksi Sarpras dapat segera memeriksa bohlam atau kabel jalurnya. Terima kasih.",
+      "dukungan": 14,
+      "status": "Selesai",
+      "tanggapan": {
+        "penjawab": "Bpk. Ir. Dedi Supriyadi (Seksi Sarpras)",
+        "tanggal": "2026-10-18",
+        "pesan": "Terima kasih laporannya. Tim sarpras sudah mengganti bohlam LED 40W baru tadi sore. Saat ini lampu PJU di pertigaan Blok J3 sudah menyala terang kembali normal."
+      }
+    },
+    {
+      "id": "suara-2",
+      "judul": "Ide Penyediaan Rak Pojok Baca Anak di Gazebo Taman Blok J5",
+      "kategori": "Ide & Inovasi",
+      "kategoriBadge": "amber",
+      "pengirim": "Ibu Ratna Dewi",
+      "blok": "Blok J5 No. 06",
+      "isAnonim": false,
+      "tanggal": "2026-10-14",
+      "isi": "Usul agar di Gazebo Taman Blok J5 dibuatkan lemari buku mini atau Pojok Baca Anak. Banyak anak-anak bermain di taman sore hari. Kami para ibu siap menyumbangkan buku cerita, komik edukasi, dan majalah anak yang masih layak baca agar anak-anak tidak kecanduan gadget.",
+      "dukungan": 28,
+      "status": "Ditindaklanjuti",
+      "tanggapan": {
+        "penjawab": "Bpk. Bambang Sutrisno (Ketua RT 10)",
+        "tanggal": "2026-10-15",
+        "pesan": "Ide yang sangat positif! Kami sudah koordinasikan dengan Seksi Sarpras untuk membuat rak gantung kayu tahan air di gazebo minggu depan. Warga yang ingin donasi buku bisa diserahkan ke Balai RT."
+      }
+    },
+    {
+      "id": "suara-3",
+      "judul": "Kritik Ketertiban Parkir Mobil Tamu di Badan Jalan Utama Blok J6",
+      "kategori": "Kritik Konstruktif",
+      "kategoriBadge": "purple",
+      "pengirim": "Warga Kompleks",
+      "blok": "Blok J6",
+      "isAnonim": true,
+      "tanggal": "2026-10-10",
+      "isi": "Mohon ketegasan pengurus mengenai mobil tamu warga yang parkir di kedua sisi badan jalan Blok J6 saat akhir pekan. Jalur jadi sangat sempit sehingga mobil sampah dan ambulans kesulitan lewat. Sebaiknya tamu diarahkan parkir di lapangan serbaguna jika carport penuh.",
+      "dukungan": 19,
+      "status": "Ditindaklanjuti",
+      "tanggapan": {
+        "penjawab": "Bpk. Slamet Riyadi (Koordinator Keamanan)",
+        "tanggal": "2026-10-11",
+        "pesan": "Masukan diterima dengan baik. Regu satpam sudah diinstruksikan memasang kerucut pembatas jalan dan mengarahkan mobil tamu parkir di bahu lapangan bulutangkis Blok J8."
+      }
+    },
+    {
+      "id": "suara-4",
+      "judul": "Kabar Bahagia: Kelahiran Putra Pertama Keluarga Bpk. Rizky Blok J2",
+      "kategori": "Berita Warga",
+      "kategoriBadge": "blue",
+      "pengirim": "Bpk. Agus Santoso (Sekretaris)",
+      "blok": "Blok J2 No. 14",
+      "isAnonim": false,
+      "tanggal": "2026-10-05",
+      "isi": "Alhamdulillah telah lahir dengan selamat putra pertama dari warga kita Bpk. Rizky & Ibu Sarah (Blok J2 No. 14) pada hari Minggu kemarin dengan berat 3.2 kg dalam kondisi sehat walafiat. Semoga menjadi anak yang sholeh dan membanggakan keluarga.",
+      "dukungan": 35,
+      "status": "Selesai",
+      "tanggapan": {
+        "penjawab": "Ibu Hj. Siti Rahmawati (Seksi Sosial)",
+        "tanggal": "2026-10-06",
+        "pesan": "Selamat kepada keluarga Bpk. Rizky. Tim perwakilan ibu-ibu PKK dan seksi sosial RT 10 telah menyerahkan bingkisan tali asih warga."
+      }
+    },
+    {
+      "id": "suara-5",
+      "judul": "Usul Fasilitas Pembayaran Iuran Menggunakan Notifikasi WhatsApp",
+      "kategori": "Usulan Warga",
+      "kategoriBadge": "teal",
+      "pengirim": "Indra Pratama",
+      "blok": "Blok J8 No. 04",
+      "isAnonim": false,
+      "tanggal": "2026-09-28",
+      "isi": "Usul untuk sistem iuran, apakah memungkinkan ada broadcast pengingat atau kirim bukti bayar otomatis via WhatsApp setelah warga bayar? Supaya warga yang sibuk kerja tidak lupa jadwal bayar sebelum tanggal 10.",
+      "dukungan": 22,
+      "status": "Ditanggapi",
+      "tanggapan": {
+        "penjawab": "Bpk. Hendra Wijaya (Bendahara)",
+        "tanggal": "2026-09-29",
+        "pesan": "Terima kasih sarannya. Saat ini kwitansi digital sudah bisa langsung dibagikan ke WhatsApp warga lewat tombol 'Kirim WA' di tabel iuran. Fitur pengingat berkala sedang kami persiapkan."
+      }
+    }
   ]
 }

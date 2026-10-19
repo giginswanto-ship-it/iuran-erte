@@ -47,3 +47,7 @@ INSERT INTO log_perubahan (waktu, aksi, keterangan) VALUES ('2026-10-19T01:30:59
 INSERT INTO transaksi (id, tanggal, jenis, kategori, uraian, nominal, warga_id, bulan_iuran, tahun_iuran, metode) VALUES ('tx-1792373470225-737', '2026-10-19', 'iuran', 'Iuran Warga', 'Iuran Bulan Januari 2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT))', 150000, 'w-1', 1, 2026, 'Tunai / Cash');
 INSERT INTO log_perubahan (waktu, aksi, keterangan) VALUES ('2026-10-19T01:31:10.735Z', 'BAYAR_IURAN (Iuran Bulan Januari 2026 - Blok J1 No. 01 (Bambang Sutrisno (Ketua RT)))', 'Sinkronisasi data ke kas_rt.sql');
 
+-- [2026-10-19 01:39:35] AKSI: MIGRASI_TOTAL_DATA_LOKAL_KE_SQL
+-- Memindahkan 100% data lokal (Settings, 200 KK Warga, 1927 Transaksi, 15 Pengurus, 5 Pengumuman, 5 Suara Warga) ke berkas kas_rt.sql
+INSERT INTO log_perubahan (waktu, aksi, keterangan) VALUES ('2026-10-19 01:39:35', 'MIGRASI_TOTAL_DATA_LOKAL_KE_SQL', 'Migrasi lengkap semua entitas lokal ke berkas database kas_rt.sql');
+

@@ -143,6 +143,14 @@ const Store = {
             this.pengurus = json.data.pengurus;
             localStorage.setItem(STORAGE_KEYS.PENGURUS, JSON.stringify(this.pengurus));
           }
+          if (Array.isArray(json.data.pengumuman) && json.data.pengumuman.length > 0) {
+            this.pengumuman = json.data.pengumuman;
+            localStorage.setItem(STORAGE_KEYS.PENGUMUMAN, JSON.stringify(this.pengumuman));
+          }
+          if (Array.isArray(json.data.suaraWarga) && json.data.suaraWarga.length > 0) {
+            this.suaraWarga = json.data.suaraWarga;
+            localStorage.setItem(STORAGE_KEYS.SUARA_WARGA, JSON.stringify(this.suaraWarga));
+          }
           const timeStr = new Date().toLocaleTimeString('id-ID');
           this.updateSqlStatus('synced', `Tersimpan di kas_rt.sql (${timeStr})`);
           this.notify();
@@ -867,6 +875,42 @@ const Store = {
     sql += `  tugas TEXT\n`;
     sql += `);\n\n`;
 
+    sql += `-- --------------------------------------------------------\n`;
+    sql += `-- 6. STRUKTUR TABEL: pengumuman (Warta Resmi Pengurus RT)\n`;
+    sql += `-- --------------------------------------------------------\n`;
+    sql += `DROP TABLE IF EXISTS pengumuman;\n`;
+    sql += `CREATE TABLE pengumuman (\n`;
+    sql += `  id VARCHAR(50) PRIMARY KEY,\n`;
+    sql += `  judul VARCHAR(255) NOT NULL,\n`;
+    sql += `  kategori VARCHAR(100) NOT NULL,\n`;
+    sql += `  badge_color VARCHAR(50) DEFAULT 'emerald',\n`;
+    sql += `  is_pinned INTEGER DEFAULT 0,\n`;
+    sql += `  tanggal DATE NOT NULL,\n`;
+    sql += `  pengirim VARCHAR(150) NOT NULL,\n`;
+    sql += `  isi TEXT NOT NULL\n`;
+    sql += `);\n\n`;
+
+    sql += `-- --------------------------------------------------------\n`;
+    sql += `-- 7. STRUKTUR TABEL: suara_warga (Aspirasi Warga RT)\n`;
+    sql += `-- --------------------------------------------------------\n`;
+    sql += `DROP TABLE IF EXISTS suara_warga;\n`;
+    sql += `CREATE TABLE suara_warga (\n`;
+    sql += `  id VARCHAR(50) PRIMARY KEY,\n`;
+    sql += `  judul VARCHAR(255) NOT NULL,\n`;
+    sql += `  kategori VARCHAR(100) NOT NULL,\n`;
+    sql += `  kategori_badge VARCHAR(50) DEFAULT 'purple',\n`;
+    sql += `  pengirim VARCHAR(150) NOT NULL,\n`;
+    sql += `  blok VARCHAR(50) NOT NULL,\n`;
+    sql += `  is_anonim INTEGER DEFAULT 0,\n`;
+    sql += `  tanggal DATE NOT NULL,\n`;
+    sql += `  isi TEXT NOT NULL,\n`;
+    sql += `  dukungan INTEGER DEFAULT 0,\n`;
+    sql += `  status VARCHAR(50) DEFAULT 'Menunggu',\n`;
+    sql += `  tanggapan_penjawab VARCHAR(150),\n`;
+    sql += `  tanggapan_tanggal DATE,\n`;
+    sql += `  tanggapan_pesan TEXT\n`;
+    sql += `);\n\n`;
+
     sql += `BEGIN TRANSACTION;\n\n`;
 
     // Settings
@@ -913,6 +957,29 @@ const Store = {
         return `  (${escapeSql(p.id)}, ${escapeSql(p.jabatan)}, ${escapeSql(p.kategori)}, ${escapeSql(p.nama)}, ${escapeSql(p.blok)}, ${escapeSql(p.telp)}, ${escapeSql(p.badge)}, ${escapeSql(p.badgeColor)}, ${escapeSql(p.avatarBg)}, ${escapeSql(p.tugas)})${isLast ? ';' : ','}`;
       });
       sql += pValues.join('\n') + `\n\n`;
+    }
+
+    // Pengumuman
+    if (this.pengumuman && this.pengumuman.length > 0) {
+      sql += `-- Data Pengumuman Resmi (${this.pengumuman.length} warta)\n`;
+      sql += `INSERT INTO pengumuman (id, judul, kategori, badge_color, is_pinned, tanggal, pengirim, isi) VALUES\n`;
+      const aValues = this.pengumuman.map((a, idx) => {
+        const isLast = idx === this.pengumuman.length - 1;
+        return `  (${escapeSql(a.id)}, ${escapeSql(a.judul)}, ${escapeSql(a.kategori)}, ${escapeSql(a.badgeColor || 'emerald')}, ${a.isPinned ? 1 : 0}, ${escapeSql(a.tanggal)}, ${escapeSql(a.pengirim)}, ${escapeSql(a.isi)})${isLast ? ';' : ','}`;
+      });
+      sql += aValues.join('\n') + `\n\n`;
+    }
+
+    // Suara Warga
+    if (this.suaraWarga && this.suaraWarga.length > 0) {
+      sql += `-- Data Suara Warga (${this.suaraWarga.length} aspirasi)\n`;
+      sql += `INSERT INTO suara_warga (id, judul, kategori, kategori_badge, pengirim, blok, is_anonim, tanggal, isi, dukungan, status, tanggapan_penjawab, tanggapan_tanggal, tanggapan_pesan) VALUES\n`;
+      const sValues = this.suaraWarga.map((s, idx) => {
+        const isLast = idx === this.suaraWarga.length - 1;
+        const t = s.tanggapan || {};
+        return `  (${escapeSql(s.id)}, ${escapeSql(s.judul)}, ${escapeSql(s.kategori)}, ${escapeSql(s.kategoriBadge || 'purple')}, ${escapeSql(s.pengirim)}, ${escapeSql(s.blok)}, ${s.isAnonim ? 1 : 0}, ${escapeSql(s.tanggal)}, ${escapeSql(s.isi)}, ${Number(s.dukungan) || 0}, ${escapeSql(s.status || 'Menunggu')}, ${escapeSql(t.penjawab || null)}, ${escapeSql(t.tanggal || null)}, ${escapeSql(t.pesan || null)})${isLast ? ';' : ','}`;
+      });
+      sql += sValues.join('\n') + `\n\n`;
     }
 
     sql += `COMMIT;\n`;
