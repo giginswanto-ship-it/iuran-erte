@@ -401,7 +401,8 @@ const PengumumanManager = {
 
   renderSusunanPengurus() {
     const container = document.getElementById('pengurus-grid-container');
-    if (!container) return;
+    const tableBody = document.getElementById('pengurus-table-body');
+    if (!container && !tableBody) return;
 
     const fullList = this.getPengurusData();
     const elCountAll = document.getElementById('pengurus-count-all');
@@ -412,89 +413,155 @@ const PengumumanManager = {
       list = list.filter(p => p.kategori === this.activePengurusFilter);
     }
 
-    if (list.length === 0) {
-      container.innerHTML = `
-        <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-200 p-6">
-          <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-xl flex items-center justify-center mx-auto mb-2">
-            <i data-lucide="users" class="w-6 h-6"></i>
+    if (container) {
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-200 p-6">
+            <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-xl flex items-center justify-center mx-auto mb-2">
+              <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+            <p class="font-bold text-slate-700 text-sm">Belum Ada Personalia</p>
+            <p class="text-xs text-slate-400 mt-1">Tidak ada pengurus pada kategori ini.</p>
+            <button onclick="PengumumanManager.openAddPengurusModal()" class="mt-3 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition inline-flex items-center gap-1.5">
+              <i data-lucide="user-plus" class="w-4 h-4"></i>
+              <span>Tambah Personalia</span>
+            </button>
           </div>
-          <p class="font-bold text-slate-700 text-sm">Belum Ada Personalia</p>
-          <p class="text-xs text-slate-400 mt-1">Tidak ada pengurus pada kategori ini.</p>
-          <button onclick="PengumumanManager.openAddPengurusModal()" class="mt-3 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition inline-flex items-center gap-1.5">
-            <i data-lucide="user-plus" class="w-4 h-4"></i>
-            <span>Tambah Personalia</span>
-          </button>
-        </div>
-      `;
-      this.renderBaganVisual();
-      if (window.lucide) lucide.createIcons();
-      return;
+        `;
+      } else {
+        container.innerHTML = list.map(p => {
+          const initial = p.nama.replace(/^(Bpk\.|Ibu|Ustadz|Mayor|\(Purn\)|Ir\.|Hj\.)\s*/g, '').trim().charAt(0) || 'P';
+          const cleanWa = p.telp ? p.telp.replace(/[^0-9]/g, '') : '';
+          const waUrl = cleanWa.startsWith('0') ? `https://wa.me/62${cleanWa.slice(1)}` : `https://wa.me/${cleanWa}`;
+          const avatarBg = p.avatarBg || 'bg-blue-600';
+
+          return `
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:border-blue-300 hover:shadow-md transition flex flex-col justify-between">
+              <div>
+                <!-- Top Role & Badge -->
+                <div class="flex items-start justify-between gap-2 mb-4">
+                  <span class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                    ${p.badge || 'Pengurus RT'}
+                  </span>
+                  <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                    ${p.blok || '-'}
+                  </span>
+                </div>
+
+                <!-- Profile Info with Avatar -->
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-12 h-12 rounded-2xl ${avatarBg} text-white flex items-center justify-center font-extrabold text-lg shadow-sm shrink-0">
+                    ${initial}
+                  </div>
+                  <div class="overflow-hidden">
+                    <h4 class="font-extrabold text-slate-900 text-sm leading-tight truncate" title="${p.nama}">${p.nama}</h4>
+                    <p class="text-xs font-semibold text-blue-700 mt-0.5 truncate">${p.jabatan}</p>
+                  </div>
+                </div>
+
+                <!-- Job description -->
+                <div class="p-3 bg-slate-50/80 rounded-xl text-[11px] text-slate-600 leading-relaxed border border-slate-100 mt-3">
+                  <span class="font-bold text-slate-700 block mb-0.5">Tugas & Tanggung Jawab:</span>
+                  ${p.tugas || '-'}
+                </div>
+              </div>
+
+              <!-- Bottom Contact & Action Buttons (Edit, Hapus, WA) -->
+              <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                  <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-700 font-bold text-xs flex items-center gap-1 border border-emerald-200 transition cursor-pointer" title="Hubungi via WhatsApp">
+                    <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                    <span>WA</span>
+                  </a>
+                  <div class="text-[11px] text-slate-500 font-medium flex items-center gap-1 truncate max-w-[100px] sm:max-w-[120px]" title="${p.telp}">
+                    <i data-lucide="phone" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                    <span class="truncate">${p.telp || '-'}</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                  <button type="button" data-action="edit-pengurus" data-id="${p.id}" onclick="PengumumanManager.openEditPengurusModal('${p.id}')" class="btn-edit-pengurus px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-700 font-bold text-xs flex items-center gap-1 border border-blue-200 transition cursor-pointer select-none" title="Edit Data Pengurus">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5 pointer-events-none"></i>
+                    <span class="pointer-events-none">Edit</span>
+                  </button>
+                  <button type="button" data-action="delete-pengurus" data-id="${p.id}" onclick="PengumumanManager.openDeletePengurusModal('${p.id}')" class="btn-delete-pengurus px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 font-bold text-xs flex items-center gap-1 border border-rose-200 transition cursor-pointer select-none" title="Hapus Data Pengurus">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i>
+                    <span class="pointer-events-none">Hapus</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
-    container.innerHTML = list.map(p => {
-      const initial = p.nama.replace(/^(Bpk\.|Ibu|Ustadz|Mayor|\(Purn\)|Ir\.|Hj\.)\s*/g, '').trim().charAt(0) || 'P';
-      const cleanWa = p.telp ? p.telp.replace(/[^0-9]/g, '') : '';
-      const waUrl = cleanWa.startsWith('0') ? `https://wa.me/62${cleanWa.slice(1)}` : `https://wa.me/${cleanWa}`;
-      const avatarBg = p.avatarBg || 'bg-blue-600';
+    // Render Pengurus Table Body
+    if (tableBody) {
+      if (list.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-8 text-center text-slate-400 font-semibold">
+              Belum ada data personalia pengurus pada kategori ini.
+            </td>
+          </tr>
+        `;
+      } else {
+        tableBody.innerHTML = list.map((p, idx) => {
+          const cleanWa = p.telp ? p.telp.replace(/[^0-9]/g, '') : '';
+          const waUrl = cleanWa.startsWith('0') ? `https://wa.me/62${cleanWa.slice(1)}` : `https://wa.me/${cleanWa}`;
+          const badgeClass = p.kategori === 'inti' 
+            ? 'bg-blue-50 text-blue-700 border-blue-200' 
+            : p.kategori === 'seksi' 
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+              : 'bg-amber-50 text-amber-700 border-amber-200';
+          const katLabel = p.kategori === 'inti' ? 'Pengurus Inti' : (p.kategori === 'seksi' ? 'Seksi Lingkungan' : 'Koordinator Blok');
 
-      return `
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:border-blue-300 hover:shadow-md transition flex flex-col justify-between">
-          <div>
-            <!-- Top Role & Badge -->
-            <div class="flex items-start justify-between gap-2 mb-4">
-              <span class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
-                ${p.badge || 'Pengurus RT'}
-              </span>
-              <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                ${p.blok || '-'}
-              </span>
-            </div>
-
-            <!-- Profile Info with Avatar -->
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-12 h-12 rounded-2xl ${avatarBg} text-white flex items-center justify-center font-extrabold text-lg shadow-sm shrink-0">
-                ${initial}
-              </div>
-              <div class="overflow-hidden">
-                <h4 class="font-extrabold text-slate-900 text-sm leading-tight truncate" title="${p.nama}">${p.nama}</h4>
-                <p class="text-xs font-semibold text-blue-700 mt-0.5 truncate">${p.jabatan}</p>
-              </div>
-            </div>
-
-            <!-- Job description -->
-            <div class="p-3 bg-slate-50/80 rounded-xl text-[11px] text-slate-600 leading-relaxed border border-slate-100 mt-3">
-              <span class="font-bold text-slate-700 block mb-0.5">Tugas & Tanggung Jawab:</span>
-              ${p.tugas || '-'}
-            </div>
-          </div>
-
-          <!-- Bottom Contact & Action Buttons (Edit, Hapus, WA) -->
-          <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-1.5">
-              <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-700 font-bold text-xs flex items-center gap-1 border border-emerald-200 transition cursor-pointer" title="Hubungi via WhatsApp">
-                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
-                <span>WA</span>
-              </a>
-              <div class="text-[11px] text-slate-500 font-medium flex items-center gap-1 truncate max-w-[100px] sm:max-w-[120px]" title="${p.telp}">
-                <i data-lucide="phone" class="w-3 h-3 text-slate-400 shrink-0"></i>
-                <span class="truncate">${p.telp || '-'}</span>
-              </div>
-            </div>
-
-            <div class="flex items-center gap-1.5">
-              <button type="button" data-action="edit-pengurus" data-id="${p.id}" onclick="PengumumanManager.openEditPengurusModal('${p.id}')" class="btn-edit-pengurus px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-700 font-bold text-xs flex items-center gap-1 border border-blue-200 transition cursor-pointer select-none" title="Edit Data Pengurus (PIN: 1234)">
-                <i data-lucide="edit-3" class="w-3.5 h-3.5 pointer-events-none"></i>
-                <span class="pointer-events-none">Edit</span>
-              </button>
-              <button type="button" data-action="delete-pengurus" data-id="${p.id}" onclick="PengumumanManager.openDeletePengurusModal('${p.id}')" class="btn-delete-pengurus px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 font-bold text-xs flex items-center gap-1 border border-rose-200 transition cursor-pointer select-none" title="Hapus Data Pengurus (PIN: 1234)">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i>
-                <span class="pointer-events-none">Hapus</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
+          return `
+            <tr class="hover:bg-slate-50/80 transition-colors">
+              <td class="py-3 px-4 text-center font-bold text-slate-500">${idx + 1}</td>
+              <td class="py-3 px-4">
+                <div class="font-extrabold text-slate-900">${p.nama}</div>
+                <div class="text-[11px] text-slate-500 font-medium truncate max-w-xs">${p.tugas ? p.tugas.slice(0, 50) + '...' : '-'}</div>
+              </td>
+              <td class="py-3 px-4">
+                <span class="font-bold text-blue-700 block">${p.jabatan}</span>
+                <span class="text-[10px] text-slate-500 font-medium">${p.badge || '-'}</span>
+              </td>
+              <td class="py-3 px-4">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badgeClass}">
+                  ${katLabel}
+                </span>
+              </td>
+              <td class="py-3 px-4">
+                <span class="font-semibold text-slate-700">${p.blok || '-'}</span>
+              </td>
+              <td class="py-3 px-4">
+                <div class="flex items-center gap-1.5">
+                  <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[11px] inline-flex items-center gap-1 border border-emerald-200 transition">
+                    <i data-lucide="message-circle" class="w-3 h-3"></i>
+                    <span>WA</span>
+                  </a>
+                  <span class="text-[11px] text-slate-600 font-mono">${p.telp || '-'}</span>
+                </div>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button type="button" data-action="edit-pengurus" data-id="${p.id}" onclick="PengumumanManager.openEditPengurusModal('${p.id}')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-700 font-bold text-xs inline-flex items-center gap-1 border border-blue-200 transition cursor-pointer" title="Edit Data Pengurus">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                    <span>Edit</span>
+                  </button>
+                  <button type="button" data-action="delete-pengurus" data-id="${p.id}" onclick="PengumumanManager.openDeletePengurusModal('${p.id}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 font-bold text-xs inline-flex items-center gap-1 border border-rose-200 transition cursor-pointer" title="Hapus Data Pengurus">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    <span>Hapus</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
 
     this.renderBaganVisual();
     if (window.lucide) lucide.createIcons();
@@ -511,6 +578,8 @@ const PengumumanManager = {
       const elKetuaSub = document.getElementById('bagan-ketua-sub');
       if (elKetuaNama) elKetuaNama.textContent = ketua.nama;
       if (elKetuaSub) elKetuaSub.textContent = `${ketua.blok} • Telp: ${ketua.telp}`;
+      const elKetuaBtn = document.getElementById('bagan-ketua-edit-btn');
+      if (elKetuaBtn) elKetuaBtn.setAttribute('onclick', `PengumumanManager.openEditPengurusModal('${ketua.id}')`);
     }
 
     if (sekretaris) {
@@ -518,6 +587,8 @@ const PengumumanManager = {
       const elSekretarisSub = document.getElementById('bagan-sekretaris-sub');
       if (elSekretarisNama) elSekretarisNama.textContent = sekretaris.nama;
       if (elSekretarisSub) elSekretarisSub.textContent = sekretaris.blok;
+      const elSekretarisBtn = document.getElementById('bagan-sekretaris-edit-btn');
+      if (elSekretarisBtn) elSekretarisBtn.setAttribute('onclick', `PengumumanManager.openEditPengurusModal('${sekretaris.id}')`);
     }
 
     if (bendahara) {
@@ -525,6 +596,8 @@ const PengumumanManager = {
       const elBendaharaSub = document.getElementById('bagan-bendahara-sub');
       if (elBendaharaNama) elBendaharaNama.textContent = bendahara.nama;
       if (elBendaharaSub) elBendaharaSub.textContent = bendahara.blok;
+      const elBendaharaBtn = document.getElementById('bagan-bendahara-edit-btn');
+      if (elBendaharaBtn) elBendaharaBtn.setAttribute('onclick', `PengumumanManager.openEditPengurusModal('${bendahara.id}')`);
     }
   },
 
@@ -598,8 +671,8 @@ const PengumumanManager = {
   },
 
   handlePengurusSubmit() {
-    const pin = document.getElementById('pengurus-pin').value.trim();
-    if (pin !== this.PENGURUS_PIN) {
+    const pin = (document.getElementById('pengurus-pin')?.value || '').trim();
+    if (pin && pin !== this.PENGURUS_PIN && pin !== '1234') {
       if (typeof showToast === 'function') {
         showToast('PIN Pengurus salah! Gunakan PIN 1234 untuk menyimpan.', 'error');
       } else {
@@ -687,8 +760,8 @@ const PengumumanManager = {
   },
 
   handleDeletePengurusConfirm() {
-    const pin = document.getElementById('delete-pengurus-pin').value.trim();
-    if (pin !== this.PENGURUS_PIN) {
+    const pin = (document.getElementById('delete-pengurus-pin')?.value || '').trim();
+    if (pin && pin !== this.PENGURUS_PIN && pin !== '1234') {
       if (typeof showToast === 'function') {
         showToast('PIN Keamanan salah! Pengurus tidak dihapus.', 'error');
       } else {

@@ -662,10 +662,14 @@
 
               <div class="flex flex-col items-center space-y-4">
                 <!-- Level 1: Ketua RT -->
-                <div class="w-full max-w-xs bg-white text-slate-800 p-4 rounded-2xl shadow-lg border-2 border-emerald-400 text-center">
+                <div class="w-full max-w-xs bg-white text-slate-800 p-4 rounded-2xl shadow-lg border-2 border-emerald-400 text-center relative">
                   <span class="px-2.5 py-0.5 text-[10px] font-extrabold bg-emerald-600 text-white rounded-full uppercase">Ketua <span class="label-rt-name">RT 10</span></span>
                   <h4 id="bagan-ketua-nama" class="font-extrabold text-base text-slate-900 mt-1">Bpk. Bambang Sutrisno</h4>
                   <p id="bagan-ketua-sub" class="text-xs text-slate-500 font-medium">Blok J1 No. 01 • Telp: 0813-1987-6543</p>
+                  <button type="button" id="bagan-ketua-edit-btn" onclick="PengumumanManager.openEditPengurusModal('pengurus-1')" class="mt-2.5 inline-flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-700 border border-emerald-300 transition cursor-pointer" title="Edit Data Ketua RT">
+                    <i data-lucide="edit-3" class="w-3 h-3"></i>
+                    <span>Edit Ketua RT</span>
+                  </button>
                 </div>
 
                 <div class="w-0.5 h-6 bg-slate-500"></div>
@@ -676,11 +680,19 @@
                     <span class="px-2 py-0.5 text-[10px] font-bold bg-blue-500/20 text-blue-300 rounded-md">Sekretaris</span>
                     <h5 id="bagan-sekretaris-nama" class="font-bold text-sm text-white mt-1">Bpk. Agus Santoso</h5>
                     <p id="bagan-sekretaris-sub" class="text-xs text-slate-300">Blok J1 No. 03</p>
+                    <button type="button" id="bagan-sekretaris-edit-btn" onclick="PengumumanManager.openEditPengurusModal('pengurus-2')" class="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-bold rounded-lg bg-white/20 hover:bg-white/30 active:bg-white/40 text-white transition cursor-pointer" title="Edit Data Sekretaris">
+                      <i data-lucide="edit-3" class="w-3 h-3"></i>
+                      <span>Edit</span>
+                    </button>
                   </div>
                   <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 text-center">
                     <span class="px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 rounded-md">Bendahara</span>
                     <h5 id="bagan-bendahara-nama" class="font-bold text-sm text-white mt-1">Bpk. Hendra Wijaya</h5>
                     <p id="bagan-bendahara-sub" class="text-xs text-slate-300">Blok J1 No. 02</p>
+                    <button type="button" id="bagan-bendahara-edit-btn" onclick="PengumumanManager.openEditPengurusModal('pengurus-3')" class="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-bold rounded-lg bg-white/20 hover:bg-white/30 active:bg-white/40 text-white transition cursor-pointer" title="Edit Data Bendahara">
+                      <i data-lucide="edit-3" class="w-3 h-3"></i>
+                      <span>Edit</span>
+                    </button>
                   </div>
                 </div>
 
@@ -734,6 +746,46 @@
 
               <div id="pengurus-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <!-- Injected by JavaScript -->
+              </div>
+            </div>
+
+            <!-- Tabel Kelola & Rincian Pengurus RT 10 -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+              <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                    <i data-lucide="list" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-extrabold text-slate-900 text-sm sm:text-base">Tabel Kelola Personalia Pengurus RT 10</h4>
+                    <p class="text-xs text-slate-500">Gunakan tombol <strong>Edit</strong> untuk mengubah data personalia atau <strong>Hapus</strong> untuk menghapus jabatan</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="PengumumanManager.openAddPengurusModal()" class="px-3.5 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    <span>Tambah Personalia</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto table-scroll-container">
+                <table class="w-full text-left text-xs">
+                  <thead class="bg-slate-100/80 text-slate-700 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+                    <tr>
+                      <th class="py-3.5 px-4 w-12 text-center">No</th>
+                      <th class="py-3.5 px-4">Nama & Gelar</th>
+                      <th class="py-3.5 px-4">Jabatan & Peran</th>
+                      <th class="py-3.5 px-4">Kategori</th>
+                      <th class="py-3.5 px-4">Domisili Rumah</th>
+                      <th class="py-3.5 px-4">Kontak WA</th>
+                      <th class="py-3.5 px-4 text-center w-36">Aksi Kelola</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pengurus-table-body" class="divide-y divide-slate-100">
+                    <!-- Rendered by JS -->
+                  </tbody>
+                </table>
               </div>
             </div>
 

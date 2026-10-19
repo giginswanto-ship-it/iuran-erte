@@ -482,6 +482,9 @@ const Store = {
   },
 
   addPengurus(item) {
+    if (!Array.isArray(this.pengurus) || this.pengurus.length === 0) {
+      this.pengurus = typeof DEFAULT_PENGURUS_RT10 !== 'undefined' ? JSON.parse(JSON.stringify(DEFAULT_PENGURUS_RT10)) : [];
+    }
     if (!item.id) item.id = 'pengurus-' + Date.now();
     this.pengurus.push(item);
     this.savePengurus(true);
